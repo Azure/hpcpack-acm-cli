@@ -5,7 +5,7 @@ import time
 import datetime
 import sys
 from command import Command
-from utils import *
+from utils import print_table, match_names
 
 class Diagnostics(Command):
     profile = {
@@ -86,13 +86,13 @@ For help of a subcommand(list|new|cancel), execute "%(prog)s -h {subcommand}"
                     job = self.api.get_diagnostic_job(self.args.id)
                     state = job.state
                 print('\n')
-            print_jobs([job])
+            self.print_jobs([job])
             result = self.api.get_diagnostic_job_aggregation_result(self.args.id)
             if result:
-                print_good_nodes(job, result)
+                self.print_good_nodes(job, result)
         else:
             jobs = self.api.get_diagnostic_jobs(reverse=not self.args.asc, count=self.args.count, last_id=self.args.last_id)
-            print_jobs(jobs)
+            self.print_jobs(jobs)
 
     def new(self):
         if self.args.nodes:
@@ -112,7 +112,7 @@ For help of a subcommand(list|new|cancel), execute "%(prog)s -h {subcommand}"
             },
         }
         job = self.api.create_diagnostic_job(job = job)
-        print_jobs([job])
+        self.print_jobs([job])
 
     def cancel(self):
         for id in self.args.ids:
@@ -121,6 +121,24 @@ For help of a subcommand(list|new|cancel), execute "%(prog)s -h {subcommand}"
                 print("Job %s is canceled." % id)
             except ApiException as e:
                 print("Failed to cancel job %s. Error:\n" % id, e)
+
+    def print_jobs(self, jobs):
+        target_nodes = {
+            'title': 'TargetNodes',
+            'value': lambda j: len(j.target_nodes)
+        }
+        print_table(['id', 'name', 'state', target_nodes, 'created_at'], jobs)
+
+    def print_good_nodes(self, job, result):
+        # result = json.loads(result)
+        # good_nodes = result.get("GoodNodes", None)
+        # if good_nodes:
+        #     good_nodes.sort()
+        #     nodes = [[n] for n in good_nodes]
+        #     header = 'GoodNodes(%d/%d)' % (len(nodes), len(job.target_nodes))
+        #     table = AsciiTable([[header]] + nodes)
+        #     print(table.table)
+        print(result)
 
 if __name__ == '__main__':
     Diagnostics.run()
