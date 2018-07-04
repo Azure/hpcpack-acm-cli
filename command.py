@@ -1,5 +1,4 @@
 from parser_builder import ParserBuilder
-import sys
 import hpc_acm
 from hpc_acm.configuration import Configuration
 from hpc_acm.api_client import ApiClient
@@ -16,7 +15,7 @@ class Command:
         self.args = args
 
     @classmethod
-    def run(cls):
+    def build_spec(cls):
         spec = {
             'options': cls.profile,
             'params': [
@@ -25,17 +24,32 @@ class Command:
                     'options': { 'help': 'set the API end point', 'default': cls.api_end_point }
                 },
             ],
-            'subcommands': {
-                'options': {
-                    'dest': 'command'
-                },
-                'items': cls.subcommands
-            },
         }
+        params = getattr(cls, 'params', None)
+        if params:
+            spec['params'] += params
+        subcommands = getattr(cls, 'subcommands', None)
+        if subcommands:
+            spec['subcommands'] = {
+                'options': {
+                    'dest': 'command' # args.command
+                },
+                'items': subcommands
+            }
+        return spec
+
+    @classmethod
+    def run(cls):
+        spec = cls.build_spec()
         parser = ParserBuilder.build(spec)
         args = parser.parse_args()
-        if not args.command:
-            parser.print_help()
-            sys.exit()
         obj = cls(args)
-        getattr(obj, args.command)()
+        cmd = getattr(args, 'command', None)
+        if cmd:
+            getattr(obj, cmd)()
+        else:
+            main = getattr(obj, 'main', None)
+            if main:
+                main()
+            else:
+                parser.print_help()
