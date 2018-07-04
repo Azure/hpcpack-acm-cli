@@ -124,7 +124,7 @@ For help of a subcommand(list|new|cancel), execute "%(prog)s -h {subcommand}"
 
     def print_jobs(self, jobs):
         target_nodes = {
-            'title': 'TargetNodes',
+            'title': 'Target nodes',
             'value': lambda j: len(j.target_nodes)
         }
         print_table(['id', 'name', 'state', target_nodes, 'created_at'], jobs)

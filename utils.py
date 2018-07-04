@@ -4,9 +4,12 @@ from terminaltables import AsciiTable
 def match_names(names, pattern):
     return [n for n in names if fnmatch.fnmatch(n, pattern)]
 
+def titlize(str):
+    return ' '.join(str.split('_')).capitalize()
+
 def print_table(fields, collection):
     def title(f):
-        return f.capitalize() if isinstance(f, str) else f['title']
+        return titlize(f) if isinstance(f, str) else f['title']
 
     def value(element, f):
         return getattr(element, f) if isinstance(f, str) else f['value'](element)
