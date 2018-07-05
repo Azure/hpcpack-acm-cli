@@ -12,7 +12,10 @@ def print_table(fields, collection):
         return titlize(f) if isinstance(f, str) else f['title']
 
     def value(element, f):
-        return getattr(element, f) if isinstance(f, str) else f['value'](element)
+        if isinstance(f, str):
+            return element[f] if isinstance(element, dict) else getattr(element, f)
+        else:
+            return f['value'](element)
 
     def to_row(element):
         return [value(element, f) for f in fields]

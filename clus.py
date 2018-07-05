@@ -4,6 +4,7 @@ from __future__ import print_function
 import time
 import datetime
 import sys
+from hpc_acm.rest import ApiException
 from command import Command
 from utils import print_table, match_names
 
@@ -91,9 +92,27 @@ For help of a subcommand(list|new|cancel), execute "%(prog)s -h {subcommand}"
                     state = job.state
                 print('\n')
             self.print_jobs([job], short_command=False)
+            if job.state in ['Finished', 'Failed', 'Canceled']:
+                self.list_tasks(job)
         else:
             jobs = self.api.get_clusrun_jobs(reverse=not self.args.asc, count=self.args.count, last_id=self.args.last_id)
             self.print_jobs(jobs)
+
+    def list_tasks(self, job):
+        def new_task(t):
+            try:
+                r = self.api.get_clusrun_task_result(job.id, t.id)
+            except ApiException: # 404
+                r = None
+            return {
+                'id': t.id,
+                'node': t.node,
+                'state': t.state,
+                'result_url': '%s/output/clusrun/%s/raw' % (Command.api_end_point, r.result_key if r else '(none)')
+            }
+        tasks = self.api.get_clusrun_tasks(job.id)
+        tasks = [new_task(t) for t in tasks]
+        print_table(['id', 'node', 'state', 'result_url'], tasks)
 
     def new(self):
         if self.args.nodes:
