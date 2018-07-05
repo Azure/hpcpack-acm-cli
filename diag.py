@@ -4,6 +4,8 @@ from __future__ import print_function
 import time
 import datetime
 import sys
+import json
+from hpc_acm.rest import ApiException
 from command import Command
 from utils import print_table, match_names
 
@@ -87,9 +89,12 @@ For help of a subcommand(list|new|cancel), execute "%(prog)s -h {subcommand}"
                     state = job.state
                 print('\n')
             self.print_jobs([job])
-            result = self.api.get_diagnostic_job_aggregation_result(self.args.id)
+            try:
+                result = self.api.get_diagnostic_job_aggregation_result(self.args.id)
+            except ApiException: # 404 when aggregation result is not ready
+                result = None
             if result:
-                self.print_good_nodes(job, result)
+                self.print_agg_result(result)
         else:
             jobs = self.api.get_diagnostic_jobs(reverse=not self.args.asc, count=self.args.count, last_id=self.args.last_id)
             self.print_jobs(jobs)
@@ -133,16 +138,18 @@ For help of a subcommand(list|new|cancel), execute "%(prog)s -h {subcommand}"
         }
         print_table(['id', 'name', 'state', target_nodes, 'created_at'], jobs)
 
-    def print_good_nodes(self, job, result):
-        # result = json.loads(result)
-        # good_nodes = result.get("GoodNodes", None)
-        # if good_nodes:
-        #     good_nodes.sort()
-        #     nodes = [[n] for n in good_nodes]
-        #     header = 'GoodNodes(%d/%d)' % (len(nodes), len(job.target_nodes))
-        #     table = AsciiTable([[header]] + nodes)
-        #     print(table.table)
-        print(result)
+    def print_agg_result(self, result):
+        if isinstance(result, str):
+            result = json.loads(result)
+        def get_and_print(field):
+            nodes = result.get(field, None)
+            if nodes is not None:
+                nodes.sort()
+                print("%s(%d):" % (field, len(nodes)))
+                for n in nodes:
+                    print(n)
+        get_and_print("GoodNodes")
+        get_and_print("BadNodes")
 
 if __name__ == '__main__':
     Diagnostics.run()
