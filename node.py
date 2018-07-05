@@ -2,7 +2,7 @@
 
 from __future__ import print_function
 from command import Command
-from utils import print_table
+from utils import print_table, match_names, shorten
 
 class Node(Command):
     profile = {
@@ -29,12 +29,29 @@ HPC diagnostic client for querying nodes.
     def main(self):
         if self.args.id:
             nodes = [self.api.get_node(self.args.id)]
+            self.print_nodes(nodes, in_short=False)
         else:
             nodes = self.api.get_nodes(count=self.args.count, last_id=self.args.last_id)
-        self.print_nodes(nodes)
+            self.print_nodes(nodes, in_short=True)
 
-    def print_nodes(self, nodes):
-        print_table(['name', 'health', 'state'], nodes)
+    def print_nodes(self, nodes, in_short=True):
+        jobs = {
+            'title': 'Running Jobs',
+            'value': lambda n: n.running_job_count
+        }
+        cores = {
+            'title': 'Cores',
+            'value': lambda n: n.node_registration_info.core_count
+        }
+        memory = {
+            'title': 'Memory(MB)',
+            'value': lambda n: n.node_registration_info.memory_megabytes
+        }
+        os = {
+            'title': 'OS',
+            'value': lambda n: shorten(n.node_registration_info.distro_info, 60) if in_short else n.node_registration_info.distro_info
+        }
+        print_table(['name', 'health', 'state', jobs, cores, memory, os], nodes)
 
 if __name__ == '__main__':
     Node.run()
