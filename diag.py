@@ -108,7 +108,11 @@ For help of a subcommand(list|new|cancel), execute "%(prog)s -h {subcommand}"
             "diagnosticTest": {
                 "name": "pingpong",
                 "category": "mpi",
-                "arguments": "[{\"name\":\"Aim\",\"value\":\"Default\"},{\"name\":\"Packet size\",\"value\":0},{\"name\":\"Mode\",\"value\":\"Tournament\"}]"
+                "arguments": [
+                    { "name": "Aim", "value": "Default" },
+                    { "name": "Packet size", "value": 0 },
+                    { "name": "Mode", "value": "Tournament" },
+                ]
             },
         }
         job = self.api.create_diagnostic_job(job = job)
