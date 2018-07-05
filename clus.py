@@ -6,7 +6,7 @@ import datetime
 import sys
 from hpc_acm.rest import ApiException
 from command import Command
-from utils import print_table, match_names
+from utils import print_table, match_names, shorten
 
 class Clusrun(Command):
     profile = {
@@ -91,7 +91,7 @@ For help of a subcommand(list|new|cancel), execute "%(prog)s -h {subcommand}"
                     job = self.api.get_clusrun_job(self.args.id)
                     state = job.state
                 print('\n')
-            self.print_jobs([job], short_command=False)
+            self.print_jobs([job], in_short=False)
             if job.state in ['Finished', 'Failed', 'Canceled']:
                 self.list_tasks(job)
         else:
@@ -138,20 +138,14 @@ For help of a subcommand(list|new|cancel), execute "%(prog)s -h {subcommand}"
             except ApiException as e:
                 print("Failed to cancel job %s. Error:\n" % id, e)
 
-    def print_jobs(self, jobs, short_command=True):
-        def shorten(cmd):
-            if len(cmd) <= 55:
-                return cmd
-            else:
-                return cmd[0:25] + ' ... ' + cmd[-25:]
-
+    def print_jobs(self, jobs, in_short=True):
         target_nodes = {
             'title': 'Target nodes',
             'value': lambda j: len(j.target_nodes)
         }
         command = {
             'title': 'Command',
-            'value': lambda j: shorten(j.command_line) if short_command else j.command_line
+            'value': lambda j: shorten(j.command_line, 60) if in_short else j.command_line
         }
         print_table(['id', command, 'state', target_nodes, 'created_at'], jobs)
 

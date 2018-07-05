@@ -25,3 +25,9 @@ def print_table(fields, collection):
     table = AsciiTable([headers] + rows)
     print(table.table)
 
+def shorten(string, limit):
+    if len(string) <= limit:
+        return string
+    else:
+        trail = ' ...'
+        return string[0:(limit - len(trail))] + trail
