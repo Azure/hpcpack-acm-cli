@@ -1,4 +1,4 @@
-from parser_builder import ParserBuilder
+from hpc_acm_cli.parser_builder import ParserBuilder
 import hpc_acm
 from hpc_acm.configuration import Configuration
 from hpc_acm.api_client import ApiClient

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 from __future__ import print_function
-from command import Command
-from utils import print_table, match_names, shorten
+from hpc_acm_cli.command import Command
+from hpc_acm_cli.utils import print_table, match_names, shorten
 
 class Node(Command):
     profile = {

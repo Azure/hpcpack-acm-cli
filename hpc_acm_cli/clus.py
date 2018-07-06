@@ -4,15 +4,14 @@ from __future__ import print_function
 import time
 import datetime
 import sys
-import json
 from hpc_acm.rest import ApiException
-from command import Command
-from utils import print_table, match_names
+from hpc_acm_cli.command import Command
+from hpc_acm_cli.utils import print_table, match_names, shorten
 
-class Diagnostics(Command):
+class Clusrun(Command):
     profile = {
         'description': '''
-HPC diagnostic client for querying/creating/canceling diagnostic jobs.
+HPC diagnostic client for querying/creating/canceling clusrun jobs.
 For help of a subcommand(list|new|cancel), execute "%(prog)s -h {subcommand}"
 '''
     }
@@ -20,7 +19,7 @@ For help of a subcommand(list|new|cancel), execute "%(prog)s -h {subcommand}"
     subcommands = [
         {
             'name': 'list',
-            'help': 'list diagnostic jobs',
+            'help': 'list clusrun jobs',
             'params': [
                 {
                     'name': '--count',
@@ -46,7 +45,7 @@ For help of a subcommand(list|new|cancel), execute "%(prog)s -h {subcommand}"
         },
         {
             'name': 'new',
-            'help': 'create a new diagnotic job',
+            'help': 'create a new clusrun job',
             'params': [
                 {
                     'group': True,
@@ -61,6 +60,10 @@ For help of a subcommand(list|new|cancel), execute "%(prog)s -h {subcommand}"
                             'options': { 'help': 'name pattern of nodes to be tested' }
                         },
                     ]
+                },
+                {
+                    'name': '--command',
+                    'options': { 'help': 'command to run on nodes', 'dest': 'command_line', 'required': True }
                 },
             ],
         },
@@ -78,26 +81,38 @@ For help of a subcommand(list|new|cancel), execute "%(prog)s -h {subcommand}"
 
     def list(self):
         if self.args.id:
-            job = self.api.get_diagnostic_job(self.args.id)
+            job = self.api.get_clusrun_job(self.args.id)
             if self.args.wait:
                 state = job.state
                 while not state in ['Finished', 'Failed', 'Canceled']:
                     sys.stdout.write('.')
                     sys.stdout.flush()
                     time.sleep(1)
-                    job = self.api.get_diagnostic_job(self.args.id)
+                    job = self.api.get_clusrun_job(self.args.id)
                     state = job.state
                 print('\n')
-            self.print_jobs([job])
-            try:
-                result = self.api.get_diagnostic_job_aggregation_result(self.args.id)
-            except ApiException: # 404 when aggregation result is not ready
-                result = None
-            if result:
-                self.print_agg_result(result)
+            self.print_jobs([job], in_short=False)
+            if job.state in ['Finished', 'Failed', 'Canceled']:
+                self.list_tasks(job)
         else:
-            jobs = self.api.get_diagnostic_jobs(reverse=not self.args.asc, count=self.args.count, last_id=self.args.last_id)
+            jobs = self.api.get_clusrun_jobs(reverse=not self.args.asc, count=self.args.count, last_id=self.args.last_id)
             self.print_jobs(jobs)
+
+    def list_tasks(self, job):
+        def new_task(t):
+            try:
+                r = self.api.get_clusrun_task_result(job.id, t.id)
+            except ApiException: # 404
+                r = None
+            return {
+                'id': t.id,
+                'node': t.node,
+                'state': t.state,
+                'result_url': '%s/output/clusrun/%s/raw' % (Command.api_end_point, r.result_key if r else '(none)')
+            }
+        tasks = self.api.get_clusrun_tasks(job.id)
+        tasks = [new_task(t) for t in tasks]
+        print_table(['id', 'node', 'state', 'result_url'], tasks)
 
     def new(self):
         if self.args.nodes:
@@ -108,49 +123,32 @@ For help of a subcommand(list|new|cancel), execute "%(prog)s -h {subcommand}"
             nodes = match_names(names, self.args.pattern)
 
         job = {
-            "name": "Mpi Pingpong@%s" % datetime.datetime.now().isoformat(),
+            "name": "Command@%s" % datetime.datetime.now().isoformat(),
             "targetNodes": nodes,
-            "diagnosticTest": {
-                "name": "pingpong",
-                "category": "mpi",
-                "arguments": [
-                    { "name": "Aim", "value": "Default" },
-                    { "name": "Packet size", "value": 0 },
-                    { "name": "Mode", "value": "Tournament" },
-                ]
-            },
+            "commandLine": self.args.command_line,
         }
-        job = self.api.create_diagnostic_job(job = job)
+        job = self.api.create_clusrun_job(job = job)
         self.print_jobs([job])
 
     def cancel(self):
         for id in self.args.ids:
             try:
-                self.api.cancel_diagnostic_job(id, job = { "request": "cancel" })
+                self.api.cancel_clusrun_job(id, job = { "request": "cancel" })
                 print("Job %s is canceled." % id)
             except ApiException as e:
                 print("Failed to cancel job %s. Error:\n" % id, e)
 
-    def print_jobs(self, jobs):
+    def print_jobs(self, jobs, in_short=True):
         target_nodes = {
             'title': 'Target nodes',
             'value': lambda j: len(j.target_nodes)
         }
-        print_table(['id', 'name', 'state', target_nodes, 'created_at'], jobs)
-
-    def print_agg_result(self, result):
-        if isinstance(result, str):
-            result = json.loads(result)
-        def get_and_print(field):
-            nodes = result.get(field, None)
-            if nodes is not None:
-                nodes.sort()
-                print("%s(%d):" % (field, len(nodes)))
-                for n in nodes:
-                    print(n)
-        get_and_print("GoodNodes")
-        get_and_print("BadNodes")
+        command = {
+            'title': 'Command',
+            'value': lambda j: shorten(j.command_line, 60) if in_short else j.command_line
+        }
+        print_table(['id', command, 'state', target_nodes, 'created_at'], jobs)
 
 if __name__ == '__main__':
-    Diagnostics.run()
+    Clusrun.run()
 
