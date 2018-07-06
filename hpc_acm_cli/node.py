@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 from __future__ import print_function
 from hpc_acm_cli.command import Command
 from hpc_acm_cli.utils import print_table, match_names, shorten
@@ -53,5 +51,8 @@ HPC diagnostic client for querying nodes.
         }
         print_table(['name', 'health', 'state', jobs, cores, memory, os], nodes)
 
-if __name__ == '__main__':
+def main():
     Node.run()
+
+if __name__ == '__main__':
+    main()

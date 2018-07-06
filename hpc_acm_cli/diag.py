@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 from __future__ import print_function
 import time
 import datetime
@@ -151,6 +149,9 @@ For help of a subcommand(list|new|cancel), execute "%(prog)s -h {subcommand}"
         get_and_print("GoodNodes")
         get_and_print("BadNodes")
 
-if __name__ == '__main__':
+def main():
     Diagnostics.run()
+
+if __name__ == '__main__':
+    main()
 
