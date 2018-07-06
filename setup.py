@@ -1,5 +1,7 @@
 import setuptools
 
+requires = ["terminaltables >= 3.1.0"]
+
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
@@ -22,5 +24,6 @@ setuptools.setup(
             'hpc-clus=hpc_acm_cli.clus:main',
             'hpc-diag=hpc_acm_cli.diag:main',
         ],
-    }
+    },
+    install_requires=requires
 )
