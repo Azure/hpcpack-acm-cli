@@ -10,7 +10,7 @@ class Clusrun(Command):
     profile = {
         'description': '''
 HPC diagnostic client for querying/creating/canceling clusrun jobs.
-For help of a subcommand(list|new|cancel), execute "%(prog)s -h {subcommand}"
+For help of a subcommand(list|show|new|cancel), execute "%(prog)s -h {subcommand}"
 '''
     }
 
@@ -31,9 +31,15 @@ For help of a subcommand(list|new|cancel), execute "%(prog)s -h {subcommand}"
                     'name': '--asc',
                     'options': { 'help': 'query in id-ascending order', 'action': 'store_true' }
                 },
+            ],
+        },
+        {
+            'name': 'show',
+            'help': 'show a clusrun job',
+            'params': [
                 {
-                    'name': '--id',
-                    'options': { 'help': 'query a single job by id' }
+                    'name': 'id',
+                    'options': { 'help': 'job id', }
                 },
                 {
                     'name': '--wait',
@@ -78,23 +84,23 @@ For help of a subcommand(list|new|cancel), execute "%(prog)s -h {subcommand}"
     ]
 
     def list(self):
-        if self.args.id:
-            job = self.api.get_clusrun_job(self.args.id)
-            if self.args.wait:
+        jobs = self.api.get_clusrun_jobs(reverse=not self.args.asc, count=self.args.count, last_id=self.args.last_id)
+        self.print_jobs(jobs)
+
+    def show(self):
+        job = self.api.get_clusrun_job(self.args.id)
+        if self.args.wait:
+            state = job.state
+            while not state in ['Finished', 'Failed', 'Canceled']:
+                sys.stdout.write('.')
+                sys.stdout.flush()
+                time.sleep(1)
+                job = self.api.get_clusrun_job(self.args.id)
                 state = job.state
-                while not state in ['Finished', 'Failed', 'Canceled']:
-                    sys.stdout.write('.')
-                    sys.stdout.flush()
-                    time.sleep(1)
-                    job = self.api.get_clusrun_job(self.args.id)
-                    state = job.state
-                print('\n')
-            self.print_jobs([job], in_short=False)
-            if job.state in ['Finished', 'Failed', 'Canceled']:
-                self.list_tasks(job)
-        else:
-            jobs = self.api.get_clusrun_jobs(reverse=not self.args.asc, count=self.args.count, last_id=self.args.last_id)
-            self.print_jobs(jobs)
+            print('\n')
+        self.print_jobs([job], in_short=False)
+        if job.state in ['Finished', 'Failed', 'Canceled']:
+            self.list_tasks(job)
 
     def list_tasks(self, job):
         def new_task(t):

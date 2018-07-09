@@ -1,3 +1,4 @@
+import argparse
 from hpc_acm_cli.parser_builder import ParserBuilder
 import hpc_acm
 from hpc_acm.configuration import Configuration
@@ -16,8 +17,12 @@ class Command:
 
     @classmethod
     def build_spec(cls):
+        options = {
+            'formatter_class': argparse.ArgumentDefaultsHelpFormatter,
+        }
+        options.update(cls.profile)
         spec = {
-            'options': cls.profile,
+            'options': options,
             'params': [
                 {
                     'name': '--host',

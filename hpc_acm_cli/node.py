@@ -6,31 +6,44 @@ class Node(Command):
     profile = {
         'description': '''
 HPC diagnostic client for querying nodes.
+For help of a subcommand(list|show), execute "%(prog)s -h {subcommand}"
 '''
     }
 
-    params = [
+    subcommands = [
         {
-            'name': '--count',
-            'options': { 'help': 'number of nodes to query', 'type': int, 'default': 25 }
+            'name': 'list',
+            'help': 'list diagnostic jobs',
+            'params': [
+                {
+                    'name': '--count',
+                    'options': { 'help': 'number of nodes to query', 'type': int, 'default': 25 }
+                },
+                {
+                    'name': '--last-id',
+                    'options': { 'help': 'the node id since which(but not included) to query' }
+                },
+            ],
         },
         {
-            'name': '--last-id',
-            'options': { 'help': 'the node id since which(but not included) to query' }
-        },
-        {
-            'name': '--id',
-            'options': { 'help': 'query a single node by id' }
+            'name': 'show',
+            'help': 'show a single node',
+            'params': [
+                {
+                    'name': 'id',
+                    'options': { 'help': 'node id', }
+                },
+            ],
         },
     ]
 
-    def main(self):
-        if self.args.id:
-            nodes = [self.api.get_node(self.args.id)]
-            self.print_nodes(nodes, in_short=False)
-        else:
-            nodes = self.api.get_nodes(count=self.args.count, last_id=self.args.last_id)
-            self.print_nodes(nodes, in_short=True)
+    def list(self):
+        nodes = self.api.get_nodes(count=self.args.count, last_id=self.args.last_id)
+        self.print_nodes(nodes, in_short=True)
+
+    def show(self):
+        nodes = [self.api.get_node(self.args.id)]
+        self.print_nodes(nodes, in_short=False)
 
     def print_nodes(self, nodes, in_short=True):
         jobs = {
