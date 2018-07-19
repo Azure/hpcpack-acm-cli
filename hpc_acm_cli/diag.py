@@ -150,7 +150,12 @@ For help of a subcommand(tests|list|show|new|cancel), execute "%(prog)s -h {subc
             'title': 'Test',
             'value': lambda t: '%s-%s' % (t.category, t.name)
         }
-        print_table([test, 'description'], tests)
+        description = {
+            'title': 'Description',
+            'value': lambda t: t.description,
+            'width': 80
+        }
+        print_table([test, description], tests)
 
     def print_jobs(self, jobs):
         target_nodes = {
