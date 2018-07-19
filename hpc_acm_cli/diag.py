@@ -11,11 +11,15 @@ class Diagnostics(Command):
     profile = {
         'description': '''
 HPC diagnostic client for querying/creating/canceling diagnostic jobs.
-For help of a subcommand(list|show|new|cancel), execute "%(prog)s -h {subcommand}"
+For help of a subcommand(tests|list|show|new|cancel), execute "%(prog)s -h {subcommand}"
 '''
     }
 
     subcommands = [
+        {
+            'name': 'tests',
+            'help': 'list available diagnostic tests',
+        },
         {
             'name': 'list',
             'help': 'list diagnostic jobs',
@@ -66,6 +70,13 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s -h {subcommand
                         },
                     ]
                 },
+                {
+                    'name': '--test',
+                    'options': {
+                        'help': 'test to run, e.g. "mpi-pingpong". For available tests, resort to the "tests" subcommand.',
+                        'required': True
+                    }
+                },
             ],
         },
         {
@@ -79,6 +90,10 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s -h {subcommand
             ],
         },
     ]
+
+    def tests(self):
+        tests = self.api.get_diagnostic_tests()
+        self.print_tests(tests)
 
     def list(self):
         jobs = self.api.get_diagnostic_jobs(reverse=not self.args.asc, count=self.args.count, last_id=self.args.last_id)
@@ -101,7 +116,7 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s -h {subcommand
         except ApiException: # 404 when aggregation result is not ready
             result = None
         if result:
-            self.print_agg_result(result)
+            self.print_agg_result(job, result)
 
     def new(self):
         if self.args.nodes:
@@ -111,17 +126,12 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s -h {subcommand
             names = [n.name for n in all]
             nodes = match_names(names, self.args.pattern)
 
+        cat, name = self.args.test.split('-')
         job = {
-            "name": "Mpi Pingpong@%s" % datetime.datetime.now().isoformat(),
             "targetNodes": nodes,
             "diagnosticTest": {
-                "name": "pingpong",
-                "category": "mpi",
-                "arguments": [
-                    { "name": "Aim", "value": "Default" },
-                    { "name": "Packet size", "value": 0 },
-                    { "name": "Mode", "value": "Tournament" },
-                ]
+                "name": name,
+                "category": cat,
             },
         }
         job = self.api.create_diagnostic_job(job = job)
@@ -135,16 +145,35 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s -h {subcommand
             except ApiException as e:
                 print("Failed to cancel job %s. Error:\n" % id, e)
 
+    def print_tests(self, tests):
+        test = {
+            'title': 'Test',
+            'value': lambda t: '%s-%s' % (t.category, t.name)
+        }
+        print_table([test, 'description'], tests)
+
     def print_jobs(self, jobs):
         target_nodes = {
             'title': 'Target nodes',
             'value': lambda j: len(j.target_nodes)
         }
-        print_table(['id', 'name', 'state', target_nodes, 'created_at'], jobs)
+        test = {
+            'title': 'Test',
+            'value': lambda j: '%s-%s' % (j.diagnostic_test.category, j.diagnostic_test.name)
+        }
+        print_table(['id', test, 'state', target_nodes, 'created_at'], jobs)
 
-    def print_agg_result(self, result):
+    def print_agg_result(self, job, result):
         if isinstance(result, str):
             result = json.loads(result)
+        if job.diagnostic_test.category == 'mpi' and job.diagnostic_test.name == 'pingpong':
+            self.print_mpi_pingpong_result(result)
+        else:
+            print('Aggregation result:')
+            json.dump(result, sys.stdout, indent=4)
+            print()
+
+    def print_mpi_pingpong_result(self, result):
         def get_and_print(field):
             nodes = result.get(field, None)
             if nodes is not None:
