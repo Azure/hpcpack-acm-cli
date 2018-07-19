@@ -20,9 +20,9 @@ setuptools.setup(
     ),
     entry_points = {
         'console_scripts': [
-            'hpc-node=hpc_acm_cli.node:main',
-            'hpc-clus=hpc_acm_cli.clus:main',
-            'hpc-diag=hpc_acm_cli.diag:main',
+            'clusnode=hpc_acm_cli.node:main',
+            'clusrun=hpc_acm_cli.clus:main',
+            'clusdiag=hpc_acm_cli.diag:main',
         ],
     },
     install_requires=requires
