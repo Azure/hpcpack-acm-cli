@@ -1,6 +1,6 @@
 from __future__ import print_function
 from hpc_acm_cli.command import Command
-from hpc_acm_cli.utils import print_table, match_names, shorten
+from hpc_acm_cli.utils import print_table, match_names, shorten, arrange
 
 class Node(Command):
     profile = {
@@ -60,7 +60,8 @@ For help of a subcommand(list|show), execute "%(prog)s -h {subcommand}"
         }
         os = {
             'title': 'OS',
-            'value': lambda n: shorten(n.node_registration_info.distro_info, 60) if in_short else n.node_registration_info.distro_info
+            'value': lambda n: shorten(n.node_registration_info.distro_info, 60) \
+                        if in_short else arrange(n.node_registration_info.distro_info, 60)
         }
         print_table(['name', 'health', 'state', jobs, cores, memory, os], nodes)
 

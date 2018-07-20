@@ -4,7 +4,7 @@ import datetime
 import sys
 from hpc_acm.rest import ApiException
 from hpc_acm_cli.command import Command
-from hpc_acm_cli.utils import print_table, match_names, shorten
+from hpc_acm_cli.utils import print_table, match_names, shorten, arrange
 
 class Clusrun(Command):
     profile = {
@@ -149,7 +149,7 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s -h {subcommand
         }
         command = {
             'title': 'Command',
-            'value': lambda j: shorten(j.command_line, 60) if in_short else j.command_line
+            'value': lambda j: shorten(j.command_line, 60) if in_short else arrange(j.command_line, 60)
         }
         print_table(['id', command, 'state', target_nodes, 'created_at'], jobs)
 

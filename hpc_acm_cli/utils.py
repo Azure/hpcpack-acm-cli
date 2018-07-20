@@ -30,9 +30,6 @@ def print_table(fields, collection):
             val = element[f] if isinstance(element, dict) else getattr(element, f)
         else:
             val = f['value'](element)
-            width = f.get('width', None)
-            if width:
-                val = arrange(val, width)
         return val
 
     def to_row(element):

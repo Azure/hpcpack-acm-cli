@@ -5,7 +5,7 @@ import sys
 import json
 from hpc_acm.rest import ApiException
 from hpc_acm_cli.command import Command
-from hpc_acm_cli.utils import print_table, match_names
+from hpc_acm_cli.utils import print_table, match_names, arrange
 
 class Diagnostics(Command):
     profile = {
@@ -152,8 +152,7 @@ For help of a subcommand(tests|list|show|new|cancel), execute "%(prog)s -h {subc
         }
         description = {
             'title': 'Description',
-            'value': lambda t: t.description,
-            'width': 80
+            'value': lambda t: arrange(t.description, 80),
         }
         print_table([test, description], tests)
 
