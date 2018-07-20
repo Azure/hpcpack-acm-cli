@@ -7,20 +7,6 @@ def match_names(names, pattern):
 def titlize(str):
     return ' '.join(str.split('_')).capitalize()
 
-def arrange(text, width):
-    l = len(text)
-    lines = l // width
-    if lines % width > 0:
-        lines += 1
-    res = []
-    i = 0
-    while i < lines:
-        start = i * width
-        line = text[start:(start + width)]
-        res.append(line)
-        i += 1
-    return '\n'.join(res)
-
 def print_table(fields, collection):
     def title(f):
         return titlize(f) if isinstance(f, str) else f['title']
@@ -46,3 +32,26 @@ def shorten(string, limit):
     else:
         trail = ' ...'
         return string[0:(limit - len(trail))] + trail
+
+def arrange(text, width):
+    words = list(reversed(text.split()))
+    lines = []
+    while words:
+        line = ''
+        avail = width
+        word = words[-1]
+        while word and len(word) <= avail:
+            words.pop()
+            line += word
+            avail -= len(word)
+            if avail > 0:
+                line += ' '
+                avail -= 1
+            word = words[-1] if words else None
+        if not line:
+            word = words.pop()
+            line = word[0:width]
+            words.append(word[width:])
+        lines.append(line)
+    return '\n'.join(lines)
+
