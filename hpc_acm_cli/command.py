@@ -1,12 +1,17 @@
+from __future__ import print_function
+import sys
+import os.path
+import configparser
 import argparse
 from hpc_acm_cli.parser_builder import ParserBuilder
+from hpc_acm_cli.arguments import Arguments
 import hpc_acm
 from hpc_acm.configuration import Configuration
 from hpc_acm.api_client import ApiClient
 from hpc_acm.rest import ApiException
 
 class Command:
-    api_end_point = 'http://frontend.westus.azurecontainer.io/v1'
+    config_path = os.path.join('~', '.hpc_acm_cli_config')
 
     def __init__(self, args):
         config = Configuration()
@@ -26,7 +31,11 @@ class Command:
             'params': [
                 {
                     'name': '--host',
-                    'options': { 'help': 'set the API end point', 'default': cls.api_end_point }
+                    'options': { 'help': 'set the API end point', 'required': True }
+                },
+                {
+                    'name': '--config',
+                    'options': { 'help': 'config file path', 'default': cls.config_path }
                 },
             ],
         }
@@ -48,6 +57,12 @@ class Command:
         spec = cls.build_spec()
         parser = ParserBuilder.build(spec)
         args = parser.parse_args()
+        if args.config:
+            config = configparser.ConfigParser()
+            if config.read(os.path.expanduser(args.config)):
+                args = Arguments(args, config)
+            elif args.config != cls.config_path:
+                print('Config file %s is not found!' % args.config, file=sys.stderr)
         obj = cls(args)
         cmd = getattr(args, 'command', None)
         if cmd:

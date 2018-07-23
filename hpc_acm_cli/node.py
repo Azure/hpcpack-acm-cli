@@ -17,7 +17,7 @@ For help of a subcommand(list|show), execute "%(prog)s -h {subcommand}"
             'params': [
                 {
                     'name': '--count',
-                    'options': { 'help': 'number of nodes to query', 'type': int, 'default': 25 }
+                    'options': { 'help': 'number of nodes to query', 'type': int }
                 },
                 {
                     'name': '--last-id',

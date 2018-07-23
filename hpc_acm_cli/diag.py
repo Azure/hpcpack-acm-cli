@@ -26,7 +26,7 @@ For help of a subcommand(tests|list|show|new|cancel), execute "%(prog)s -h {subc
             'params': [
                 {
                     'name': '--count',
-                    'options': { 'help': 'number of jobs to query', 'type': int, 'default': 25 }
+                    'options': { 'help': 'number of jobs to query', 'type': int }
                 },
                 {
                     'name': '--last-id',
