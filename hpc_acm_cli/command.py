@@ -5,7 +5,6 @@ import shutil
 import configparser
 import argparse
 from hpc_acm_cli.parser_builder import ParserBuilder
-from hpc_acm_cli.arguments import Arguments
 import hpc_acm
 from hpc_acm.configuration import Configuration
 from hpc_acm.api_client import ApiClient
@@ -24,28 +23,36 @@ class Command:
         self.args = args
 
     @classmethod
-    def build_spec(cls):
+    def profile(cls):
+        return {}
+
+    @classmethod
+    def params(cls, config):
+        return []
+
+    @classmethod
+    def subcommands(cls, config):
+        return []
+
+    @classmethod
+    def build_spec(cls, config):
         options = {
             'formatter_class': argparse.ArgumentDefaultsHelpFormatter,
         }
-        options.update(cls.profile)
+        options.update(cls.profile())
         spec = {
             'options': options,
             'params': [
                 {
                     'name': '--host',
-                    'options': { 'help': 'set the API end point', 'required': True }
-                },
-                {
-                    'name': '--config',
-                    'options': { 'help': 'config file path', 'default': cls.config_path }
+                    'options': { 'help': 'set the API end point', 'default': config.get('DEFAULT', 'host', fallback=None) }
                 },
             ],
         }
-        params = getattr(cls, 'params', None)
+        params = cls.params(config)
         if params:
             spec['params'] += params
-        subcommands = getattr(cls, 'subcommands', None)
+        subcommands = cls.subcommands(config)
         if subcommands:
             spec['subcommands'] = {
                 'options': {
@@ -58,24 +65,30 @@ class Command:
     # The reason to have this method is explained in setup.py of the containing package.
     # Simply put, the Python package installation can't copy the default config to user home.
     @classmethod
-    def make_sure_default_config(cls):
+    def ensure_default_config(cls):
         if not os.path.exists(cls.config_path):
             path = sys.modules['hpc_acm_cli'].__file__
             dist_path = os.path.dirname(os.path.dirname(path))
             shutil.copyfile(os.path.join(dist_path, cls.config_file_name), cls.config_path)
 
     @classmethod
+    def read_default_config(cls):
+        cls.ensure_default_config()
+        config = configparser.ConfigParser()
+        if not config.read(cls.config_path):
+            raise FileNotFoundError('Config file %s is not found!' % args.config)
+        return config
+
+    @classmethod
     def run(cls):
-        cls.make_sure_default_config()
-        spec = cls.build_spec()
+        try:
+            config = cls.read_default_config()
+        except FileNotFoundError as e:
+            config = configparser.ConfigParser()
+            print(e, file=sys.stderr)
+        spec = cls.build_spec(config)
         parser = ParserBuilder.build(spec)
         args = parser.parse_args()
-        if args.config:
-            config = configparser.ConfigParser()
-            if config.read(args.config):
-                args = Arguments(args, config)
-            elif args.config != cls.config_path:
-                print('Config file %s is not found!' % args.config, file=sys.stderr)
         obj = cls(args)
         cmd = getattr(args, 'command', None)
         if cmd:

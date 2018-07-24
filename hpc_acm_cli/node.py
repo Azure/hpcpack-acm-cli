@@ -3,39 +3,47 @@ from hpc_acm_cli.command import Command
 from hpc_acm_cli.utils import print_table, match_names, shorten, arrange
 
 class Node(Command):
-    profile = {
-        'description': '''
+    @classmethod
+    def profile(cls):
+        return {
+            'description': '''
 HPC diagnostic client for querying nodes.
 For help of a subcommand(list|show), execute "%(prog)s -h {subcommand}"
 '''
-    }
+        }
 
-    subcommands = [
-        {
-            'name': 'list',
-            'help': 'list diagnostic jobs',
-            'params': [
-                {
-                    'name': '--count',
-                    'options': { 'help': 'number of nodes to query', 'type': int }
-                },
-                {
-                    'name': '--last-id',
-                    'options': { 'help': 'the node id since which(but not included) to query' }
-                },
-            ],
-        },
-        {
-            'name': 'show',
-            'help': 'show a single node',
-            'params': [
-                {
-                    'name': 'id',
-                    'options': { 'help': 'node id', }
-                },
-            ],
-        },
-    ]
+    @classmethod
+    def subcommands(cls, config):
+        return [
+            {
+                'name': 'list',
+                'help': 'list diagnostic jobs',
+                'params': [
+                    {
+                        'name': '--count',
+                        'options': {
+                            'help': 'number of nodes to query',
+                            'type': int,
+                            'default': config.getint('DEFAULT', 'count', fallback=None)
+                        }
+                    },
+                    {
+                        'name': '--last-id',
+                        'options': { 'help': 'the node id since which(but not included) to query' }
+                    },
+                ],
+            },
+            {
+                'name': 'show',
+                'help': 'show a single node',
+                'params': [
+                    {
+                        'name': 'id',
+                        'options': { 'help': 'node id', }
+                    },
+                ],
+            },
+        ]
 
     def list(self):
         nodes = self.api.get_nodes(count=self.args.count, last_id=self.args.last_id)

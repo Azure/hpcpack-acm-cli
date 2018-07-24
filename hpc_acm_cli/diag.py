@@ -8,88 +8,96 @@ from hpc_acm_cli.command import Command
 from hpc_acm_cli.utils import print_table, match_names, arrange
 
 class Diagnostics(Command):
-    profile = {
-        'description': '''
+    @classmethod
+    def profile(cls):
+        return {
+            'description': '''
 HPC diagnostic client for querying/creating/canceling diagnostic jobs.
 For help of a subcommand(tests|list|show|new|cancel), execute "%(prog)s -h {subcommand}"
-'''
-    }
+    '''
+        }
 
-    subcommands = [
-        {
-            'name': 'tests',
-            'help': 'list available diagnostic tests',
-        },
-        {
-            'name': 'list',
-            'help': 'list diagnostic jobs',
-            'params': [
-                {
-                    'name': '--count',
-                    'options': { 'help': 'number of jobs to query', 'type': int }
-                },
-                {
-                    'name': '--last-id',
-                    'options': { 'help': 'the job id since which(but not included) to query' }
-                },
-                {
-                    'name': '--asc',
-                    'options': { 'help': 'query in id-ascending order', 'action': 'store_true' }
-                },
-            ],
-        },
-        {
-            'name': 'show',
-            'help': 'show a diagnostic job',
-            'params': [
-                {
-                    'name': 'id',
-                    'options': { 'help': 'job id', }
-                },
-                {
-                    'name': '--wait',
-                    'options': { 'help': 'wait a job until it\'s over', 'action': 'store_true' }
-                },
-            ],
-        },
-        {
-            'name': 'new',
-            'help': 'create a new diagnotic job',
-            'params': [
-                {
-                    'group': True,
-                    'options': { 'required': True },
-                    'items': [
-                        {
-                            'name': '--nodes',
-                            'options': { 'help': 'names of nodes to be tested', 'metavar': 'node', 'nargs': '+' }
-                        },
-                        {
-                            'name': '--pattern',
-                            'options': { 'help': 'name pattern of nodes to be tested' }
-                        },
-                    ]
-                },
-                {
-                    'name': '--test',
-                    'options': {
-                        'help': 'test to run, e.g. "mpi-pingpong". For available tests, resort to the "tests" subcommand.',
-                        'required': True
-                    }
-                },
-            ],
-        },
-        {
-            'name': 'cancel',
-            'help': 'cancel a job',
-            'params': [
-                {
-                    'name': 'ids',
-                    'options': { 'help': 'job id', 'metavar': 'id', 'nargs': '+' }
-                },
-            ],
-        },
-    ]
+    @classmethod
+    def subcommands(cls, config):
+        return [
+            {
+                'name': 'tests',
+                'help': 'list available diagnostic tests',
+            },
+            {
+                'name': 'list',
+                'help': 'list diagnostic jobs',
+                'params': [
+                    {
+                        'name': '--count',
+                        'options': {
+                            'help': 'number of jobs to query',
+                            'type': int,
+                            'default': config.getint('DEFAULT', 'count', fallback=None)
+                        }
+                    },
+                    {
+                        'name': '--last-id',
+                        'options': { 'help': 'the job id since which(but not included) to query' }
+                    },
+                    {
+                        'name': '--asc',
+                        'options': { 'help': 'query in id-ascending order', 'action': 'store_true' }
+                    },
+                ],
+            },
+            {
+                'name': 'show',
+                'help': 'show a diagnostic job',
+                'params': [
+                    {
+                        'name': 'id',
+                        'options': { 'help': 'job id', }
+                    },
+                    {
+                        'name': '--wait',
+                        'options': { 'help': 'wait a job until it\'s over', 'action': 'store_true' }
+                    },
+                ],
+            },
+            {
+                'name': 'new',
+                'help': 'create a new diagnotic job',
+                'params': [
+                    {
+                        'group': True,
+                        'options': { 'required': True },
+                        'items': [
+                            {
+                                'name': '--nodes',
+                                'options': { 'help': 'names of nodes to be tested', 'metavar': 'node', 'nargs': '+' }
+                            },
+                            {
+                                'name': '--pattern',
+                                'options': { 'help': 'name pattern of nodes to be tested' }
+                            },
+                        ]
+                    },
+                    {
+                        'name': '--test',
+                        'options': {
+                            'help': 'test to run, e.g. "mpi-pingpong". For available tests, resort to the "tests" subcommand.',
+                            'required': True
+                        }
+                    },
+                ],
+            },
+            {
+                'name': 'cancel',
+                'help': 'cancel a job',
+                'params': [
+                    {
+                        'name': 'ids',
+                        'options': { 'help': 'job id', 'metavar': 'id', 'nargs': '+' }
+                    },
+                ],
+            },
+        ]
 
     def tests(self):
         tests = self.api.get_diagnostic_tests()

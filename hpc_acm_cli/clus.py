@@ -7,81 +7,89 @@ from hpc_acm_cli.command import Command
 from hpc_acm_cli.utils import print_table, match_names, shorten, arrange
 
 class Clusrun(Command):
-    profile = {
-        'description': '''
+    @classmethod
+    def profile(cls):
+        return {
+            'description': '''
 HPC diagnostic client for querying/creating/canceling clusrun jobs.
 For help of a subcommand(list|show|new|cancel), execute "%(prog)s -h {subcommand}"
 '''
-    }
+        }
 
-    subcommands = [
-        {
-            'name': 'list',
-            'help': 'list clusrun jobs',
-            'params': [
-                {
-                    'name': '--count',
-                    'options': { 'help': 'number of jobs to query', 'type': int }
-                },
-                {
-                    'name': '--last-id',
-                    'options': { 'help': 'the job id since which(but not included) to query' }
-                },
-                {
-                    'name': '--asc',
-                    'options': { 'help': 'query in id-ascending order', 'action': 'store_true' }
-                },
-            ],
-        },
-        {
-            'name': 'show',
-            'help': 'show a clusrun job',
-            'params': [
-                {
-                    'name': 'id',
-                    'options': { 'help': 'job id', }
-                },
-                {
-                    'name': '--wait',
-                    'options': { 'help': 'wait a job until it\'s over', 'action': 'store_true' }
-                },
-            ],
-        },
-        {
-            'name': 'new',
-            'help': 'create a new clusrun job',
-            'params': [
-                {
-                    'group': True,
-                    'options': { 'required': True },
-                    'items': [
-                        {
-                            'name': '--nodes',
-                            'options': { 'help': 'names of nodes to be tested', 'metavar': 'node', 'nargs': '+' }
-                        },
-                        {
-                            'name': '--pattern',
-                            'options': { 'help': 'name pattern of nodes to be tested' }
-                        },
-                    ]
-                },
-                {
-                    'name': '--command',
-                    'options': { 'help': 'command to run on nodes', 'dest': 'command_line', 'required': True }
-                },
-            ],
-        },
-        {
-            'name': 'cancel',
-            'help': 'cancel a job',
-            'params': [
-                {
-                    'name': 'ids',
-                    'options': { 'help': 'job id', 'metavar': 'id', 'nargs': '+' }
-                },
-            ],
-        },
-    ]
+    @classmethod
+    def subcommands(cls, config):
+        return [
+            {
+                'name': 'list',
+                'help': 'list clusrun jobs',
+                'params': [
+                    {
+                        'name': '--count',
+                        'options': {
+                            'help': 'number of jobs to query',
+                            'type': int,
+                            'default': config.getint('DEFAULT', 'count', fallback=None)
+                        }
+                    },
+                    {
+                        'name': '--last-id',
+                        'options': { 'help': 'the job id since which(but not included) to query' }
+                    },
+                    {
+                        'name': '--asc',
+                        'options': { 'help': 'query in id-ascending order', 'action': 'store_true' }
+                    },
+                ],
+            },
+            {
+                'name': 'show',
+                'help': 'show a clusrun job',
+                'params': [
+                    {
+                        'name': 'id',
+                        'options': { 'help': 'job id', }
+                    },
+                    {
+                        'name': '--wait',
+                        'options': { 'help': 'wait a job until it\'s over', 'action': 'store_true' }
+                    },
+                ],
+            },
+            {
+                'name': 'new',
+                'help': 'create a new clusrun job',
+                'params': [
+                    {
+                        'group': True,
+                        'options': { 'required': True },
+                        'items': [
+                            {
+                                'name': '--nodes',
+                                'options': { 'help': 'names of nodes to be tested', 'metavar': 'node', 'nargs': '+' }
+                            },
+                            {
+                                'name': '--pattern',
+                                'options': { 'help': 'name pattern of nodes to be tested' }
+                            },
+                        ]
+                    },
+                    {
+                        'name': '--command',
+                        'options': { 'help': 'command to run on nodes', 'dest': 'command_line', 'required': True }
+                    },
+                ],
+            },
+            {
+                'name': 'cancel',
+                'help': 'cancel a job',
+                'params': [
+                    {
+                        'name': 'ids',
+                        'options': { 'help': 'job id', 'metavar': 'id', 'nargs': '+' }
+                    },
+                ],
+            },
+        ]
 
     def list(self):
         jobs = self.api.get_clusrun_jobs(reverse=not self.args.asc, count=self.args.count, last_id=self.args.last_id)
