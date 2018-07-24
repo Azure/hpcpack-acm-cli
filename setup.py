@@ -1,4 +1,5 @@
 import setuptools
+import os.path
 
 requires = ["terminaltables >= 3.1.0"]
 
@@ -18,12 +19,15 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ),
-    entry_points = {
+    entry_points={
         'console_scripts': [
             'clusnode=hpc_acm_cli.node:main',
             'clusrun=hpc_acm_cli.clus:main',
             'clusdiag=hpc_acm_cli.diag:main',
         ],
     },
+    data_files=[
+        (os.path.expanduser('~'), ['.hpc_acm_cli_config']),
+    ],
     install_requires=requires
 )

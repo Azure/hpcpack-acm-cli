@@ -1,0 +1,4 @@
+[DEFAULT]
+# Set host to address your api server, like:
+# host=http://myapi.com/path
+count=25
