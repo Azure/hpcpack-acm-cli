@@ -39,3 +39,7 @@ pip install -e git+https://github.com/coin8086/hpc_acm_cli.git#egg=hpc-acm-cli
 ```
 
 You're assumed to have installed Python `rh-python36`. If not, replace it with yours. Also note that `pip` in above code refers to Python3's pip, and thus no need of `pip3`.
+
+## Usage
+
+After installation, there're 3 commands avaiable: `clusnode`, `clusdiag` and `clusrun` for cluster nodes, diagnostic jobs and general commands separately. They each have some subcommands, such `list` and `show`, etc. Execute them with `-h` paramter for help message, like `clusnode -h`.
