@@ -42,4 +42,4 @@ You're assumed to have installed Python `rh-python36`. If not, replace it with y
 
 ## Usage
 
-After installation, there're 3 commands avaiable: `clusnode`, `clusdiag` and `clusrun` for cluster nodes, diagnostic jobs and general commands separately. They each have some subcommands, such `list` and `show`, etc. Execute them with `-h` paramter for help message, like `clusnode -h`.
+After installation, there're 3 commands avaiable: `clusnode`, `clusdiag` and `clusrun` for cluster nodes, diagnostic jobs and general commands separately. They each have some subcommands, such as `list` and `show`, etc. Execute them with `-h` paramter for help message, like `clusnode -h`.
