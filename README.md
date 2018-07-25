@@ -12,7 +12,7 @@ HPC diagnostic client tools based on HPC ACM API.
 To install locally from source, execute
 
 ```
-python3 setup.py install --user
+pip3 install -e .
 ```
 
 under the root of the source dir.
