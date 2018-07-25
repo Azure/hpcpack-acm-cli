@@ -1,4 +1,3 @@
 [DEFAULT]
-# Set host to address your api server, like:
-# host=http://myapi.com/path
+host=http://frontend.westus.azurecontainer.io/v1
 count=25
