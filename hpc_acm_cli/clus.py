@@ -61,15 +61,21 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
                 'params': [
                     {
                         'group': True,
-                        'options': { 'required': True },
                         'items': [
                             {
                                 'name': '--nodes',
-                                'options': { 'help': 'names of nodes to be tested', 'metavar': 'node', 'nargs': '+' }
+                                'options': {
+                                    'help': 'names of nodes to be tested. Either this or the --pattern parameter must be provided.',
+                                    'metavar': 'node',
+                                    'nargs': '+'
+                                }
                             },
                             {
                                 'name': '--pattern',
-                                'options': { 'help': 'name pattern of nodes to be tested' }
+                                'options': {
+                                    'help': 'name pattern of nodes to be tested. Either this or the --nodes parameter must be provided.',
+                                    'default': config.get('DEFAULT', 'pattern', fallback=None)
+                                }
                             },
                         ]
                     },
@@ -129,10 +135,12 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
     def new(self):
         if self.args.nodes:
             nodes = self.args.nodes
-        else:
+        elif self.args.pattern:
             all = self.api.get_nodes(count=1000000)
             names = [n.name for n in all]
             nodes = match_names(names, self.args.pattern)
+        else:
+            raise ValueError('Either nodes or pattern parameter must be provided!')
 
         job = {
             "name": "Command@%s" % datetime.datetime.now().isoformat(),

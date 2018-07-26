@@ -48,9 +48,4 @@ After installation, there're 3 commands avaiable: `clusnode`, `clusdiag` and `cl
 
 The commands share a common config file, `.hpc_acm_cli_config`, which is under the user's home directory(~). Usually, it's `/home/{username}` for Linux, and `c:\users\{username}` for Windows.
 
-The config file can set default values for parameters of the commands. It supports:
-
-* host: the url of the API server
-* count: the number of objects to list
-
-The default values are overriden by values from command line.
+The config file can set default values for parameters of the commands. See comments in default(initial) config file for details. The default values are overriden by values from command line.

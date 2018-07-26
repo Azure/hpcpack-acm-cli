@@ -1,3 +1,7 @@
 [DEFAULT]
+# API server url, default value for "--host" parameter
 host=http://frontend.westus.azurecontainer.io/v1
+# Number of items to show in a "list" subcommand, default value for "--count" parameter
 count=25
+# Node pattern to "new" subcommand, default value for "--pattern" parameter
+pattern=*

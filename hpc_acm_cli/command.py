@@ -92,10 +92,15 @@ class Command:
         obj = cls(args)
         cmd = getattr(args, 'command', None)
         if cmd:
-            getattr(obj, cmd)()
+            cmd = getattr(obj, cmd)
         else:
-            main = getattr(obj, 'main', None)
-            if main:
-                main()
-            else:
+            cmd = getattr(obj, 'main', None)
+        if cmd:
+            try:
+                cmd()
+            except ValueError as e:
+                print('Error: %s' % e)
                 parser.print_help()
+                sys.exit(1)
+        else:
+            parser.print_help()
