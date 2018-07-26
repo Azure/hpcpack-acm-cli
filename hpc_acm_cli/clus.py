@@ -12,7 +12,7 @@ class Clusrun(Command):
         return {
             'description': '''
 HPC diagnostic client for querying/creating/canceling clusrun jobs.
-For help of a subcommand(list|show|new|cancel), execute "%(prog)s -h {subcommand}"
+For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -h"
 '''
         }
 

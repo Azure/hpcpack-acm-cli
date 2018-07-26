@@ -8,7 +8,7 @@ class Node(Command):
         return {
             'description': '''
 HPC diagnostic client for querying nodes.
-For help of a subcommand(list|show), execute "%(prog)s -h {subcommand}"
+For help of a subcommand(list|show), execute "%(prog)s {subcommand} -h"
 '''
         }
 
