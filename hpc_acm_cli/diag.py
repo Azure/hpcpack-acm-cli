@@ -22,11 +22,15 @@ For help of a subcommand(tests|list|show|new|cancel), execute "%(prog)s {subcomm
         return [
             {
                 'name': 'tests',
-                'help': 'list available diagnostic tests',
+                'options': {
+                    'help': 'list available diagnostic tests',
+                },
             },
             {
                 'name': 'list',
-                'help': 'list diagnostic jobs',
+                'options': {
+                    'help': 'list diagnostic jobs',
+                },
                 'params': [
                     {
                         'name': '--count',
@@ -48,7 +52,9 @@ For help of a subcommand(tests|list|show|new|cancel), execute "%(prog)s {subcomm
             },
             {
                 'name': 'show',
-                'help': 'show a diagnostic job',
+                'options': {
+                    'help': 'show a diagnostic job',
+                },
                 'params': [
                     {
                         'name': 'id',
@@ -62,7 +68,9 @@ For help of a subcommand(tests|list|show|new|cancel), execute "%(prog)s {subcomm
             },
             {
                 'name': 'new',
-                'help': 'create a new diagnotic job',
+                'options': {
+                    'help': 'create a new diagnotic job',
+                },
                 'params': [
                     {
                         'group': True,
@@ -94,7 +102,9 @@ For help of a subcommand(tests|list|show|new|cancel), execute "%(prog)s {subcomm
             },
             {
                 'name': 'cancel',
-                'help': 'cancel a job',
+                'options': {
+                    'help': 'cancel a job',
+                },
                 'params': [
                     {
                         'name': 'ids',

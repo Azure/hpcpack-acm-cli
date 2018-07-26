@@ -21,7 +21,9 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
         return [
             {
                 'name': 'list',
-                'help': 'list clusrun jobs',
+                'options': {
+                    'help': 'list clusrun jobs',
+                },
                 'params': [
                     {
                         'name': '--count',
@@ -43,7 +45,9 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
             },
             {
                 'name': 'show',
-                'help': 'show a clusrun job',
+                'options': {
+                    'help': 'show a clusrun job',
+                },
                 'params': [
                     {
                         'name': 'id',
@@ -57,7 +61,9 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
             },
             {
                 'name': 'new',
-                'help': 'create a new clusrun job',
+                'options': {
+                    'help': 'create a new clusrun job',
+                },
                 'params': [
                     {
                         'group': True,
@@ -87,7 +93,9 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
             },
             {
                 'name': 'cancel',
-                'help': 'cancel a job',
+                'options': {
+                    'help': 'cancel a job',
+                },
                 'params': [
                     {
                         'name': 'ids',

@@ -54,6 +54,10 @@ class Command:
             spec['params'] += params
         subcommands = cls.subcommands(config)
         if subcommands:
+            for e in subcommands:
+                options = { 'formatter_class': argparse.ArgumentDefaultsHelpFormatter }
+                options.update(e['options'])
+                e['options'] = options
             spec['subcommands'] = {
                 'options': {
                     'dest': 'command' # args.command

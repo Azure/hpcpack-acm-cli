@@ -11,7 +11,7 @@ class ParserBuilder:
         if subcommands:
             subparsers = parser.add_subparsers(**subcommands.get('options', {}))
             for cmd in subcommands['items']:
-                subparser = subparsers.add_parser(cmd['name'], help=cmd['help'])
+                subparser = subparsers.add_parser(cmd['name'], **cmd.get('options', {}))
                 params = cmd.get('params', None)
                 if params:
                     cls.add_params(subparser, params);

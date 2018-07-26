@@ -17,7 +17,9 @@ For help of a subcommand(list|show), execute "%(prog)s {subcommand} -h"
         return [
             {
                 'name': 'list',
-                'help': 'list diagnostic jobs',
+                'options': {
+                    'help': 'list diagnostic jobs',
+                },
                 'params': [
                     {
                         'name': '--count',
@@ -35,7 +37,9 @@ For help of a subcommand(list|show), execute "%(prog)s {subcommand} -h"
             },
             {
                 'name': 'show',
-                'help': 'show a single node',
+                'options': {
+                    'help': 'show a single node',
+                },
                 'params': [
                     {
                         'name': 'id',
