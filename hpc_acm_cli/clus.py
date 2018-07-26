@@ -74,8 +74,8 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s -h {subcommand
                         ]
                     },
                     {
-                        'name': '--command',
-                        'options': { 'help': 'command to run on nodes', 'dest': 'command_line', 'required': True }
+                        'name': 'command_line',
+                        'options': { 'help': 'command to run on nodes', 'metavar': 'command' }
                     },
                 ],
             },

@@ -79,10 +79,9 @@ For help of a subcommand(tests|list|show|new|cancel), execute "%(prog)s -h {subc
                         ]
                     },
                     {
-                        'name': '--test',
+                        'name': 'test',
                         'options': {
                             'help': 'test to run, e.g. "mpi-pingpong". For available tests, resort to the "tests" subcommand.',
-                            'required': True
                         }
                     },
                 ],
