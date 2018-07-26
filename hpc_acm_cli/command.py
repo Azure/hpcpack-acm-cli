@@ -106,5 +106,8 @@ class Command:
                 print('Error: %s' % e)
                 parser.print_help()
                 sys.exit(1)
+            except ApiException as e:
+                print('Error: %s' % e)
+                sys.exit(2)
         else:
             parser.print_help()
