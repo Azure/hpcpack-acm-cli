@@ -134,7 +134,7 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
                 'id': t.id,
                 'node': t.node,
                 'state': t.state,
-                'result_url': '%s/output/clusrun/%s/raw' % (self.args.host, r.result_key if r else '(none)')
+                'result_url': '%s/output/clusrun/%s/raw' % (self.args.host, r.result_key) if r else ''
             }
         tasks = self.api.get_clusrun_tasks(job.id)
         tasks = [new_task(t) for t in tasks]
