@@ -17,13 +17,19 @@ pip3 install -e .
 
 under the root of the source dir.
 
-To install from GitHub, execute
+To install the latest release version from GitHub, execute
+
+```
+pip3 install -e git+https://github.com/coin8086/hpc_acm_cli.git@release#egg=hpc-acm-cli
+```
+
+To install the latest code in development, execute
 
 ```
 pip3 install -e git+https://github.com/coin8086/hpc_acm_cli.git#egg=hpc-acm-cli
 ```
 
-`pip3` is the pip for Python3.
+`pip3` is the pip for Python3 on Debian/Ubuntu. It may be just `pip` on other Linux distributions and Windows.
 
 ### Special Notes for CentOS/SCL
 
