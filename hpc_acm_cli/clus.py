@@ -53,10 +53,6 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
                         'name': 'id',
                         'options': { 'help': 'job id', }
                     },
-                    {
-                        'name': '--wait',
-                        'options': { 'help': 'wait a job until it\'s over', 'action': 'store_true' }
-                    },
                 ],
             },
             {
@@ -111,18 +107,8 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
 
     def show(self):
         job = self.api.get_clusrun_job(self.args.id)
-        if self.args.wait:
-            state = job.state
-            while not state in ['Finished', 'Failed', 'Canceled']:
-                sys.stdout.write('.')
-                sys.stdout.flush()
-                time.sleep(1)
-                job = self.api.get_clusrun_job(self.args.id)
-                state = job.state
-            print('\n')
         self.print_jobs([job], in_short=False)
-        if job.state in ['Finished', 'Failed', 'Canceled']:
-            self.list_tasks(job)
+        self.list_tasks(job)
 
     def list_tasks(self, job):
         def new_task(t):
