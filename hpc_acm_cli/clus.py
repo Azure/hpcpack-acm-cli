@@ -111,20 +111,21 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
         self.list_tasks(job)
 
     def list_tasks(self, job):
-        def new_task(t):
+        def get_result(task, result):
             try:
-                r = self.api.get_clusrun_task_result(job.id, t.id)
+                r = result.get()
             except ApiException: # 404
                 r = None
             return {
-                'id': t.id,
-                'node': t.node,
-                'state': t.state,
+                'id': task.id,
+                'node': task.node,
+                'state': task.state,
                 'result_url': '%s/output/clusrun/%s/raw' % (self.args.host, r.result_key) if r else ''
             }
         tasks = self.api.get_clusrun_tasks(job.id)
-        tasks = [new_task(t) for t in tasks]
-        print_table(['id', 'node', 'state', 'result_url'], tasks)
+        task_results = [(t, self.api.get_clusrun_task_result(job.id, t.id, async=True)) for t in tasks]
+        results = [get_result(t[0], t[1]) for t in task_results]
+        print_table(['id', 'node', 'state', 'result_url'], results)
 
     def new(self):
         if self.args.nodes:
