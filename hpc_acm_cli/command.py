@@ -10,6 +10,11 @@ from hpc_acm.configuration import Configuration
 from hpc_acm.api_client import ApiClient
 from hpc_acm.rest import ApiException
 
+# See https://github.com/swagger-api/swagger-codegen/issues/8504
+# from multiprocessing import util
+# util.DEFAULT_LOGGING_FORMAT = '[%(levelname)s/%(threadName)s:%(thread)d] %(message)s'
+# util.log_to_stderr(util.DEBUG)
+
 class Command:
     config_file_name = '.hpc_acm_cli_config'
     config_dir = os.path.expanduser('~')
