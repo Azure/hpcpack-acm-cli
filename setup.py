@@ -1,7 +1,7 @@
 import setuptools
 import os.path
 
-requires = ["terminaltables >= 3.1.0"]
+requires = ["terminaltables >= 3.1.0", "tqdm >= 4.24.0"]
 
 with open("README.md", "r") as fh:
     long_description = fh.read()

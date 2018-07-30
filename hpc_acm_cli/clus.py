@@ -2,6 +2,7 @@ from __future__ import print_function
 import time
 import datetime
 import sys
+from tqdm import tqdm
 from hpc_acm.rest import ApiException
 from hpc_acm_cli.command import Command
 from hpc_acm_cli.utils import print_table, match_names, shorten, arrange
@@ -111,6 +112,18 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
         self.list_tasks(job)
 
     def list_tasks(self, job):
+        def wait(tasks):
+            total = len(tasks)
+            ready = 0
+            with tqdm(total=total) as prog:
+                prog.set_description("Loading tasks")
+                while ready < total:
+                    time.sleep(0.1)
+                    s = sum(t[1].ready() for t in tasks)
+                    prog.update(s - ready)
+                    ready = s
+                prog.clear()
+
         def get_result(task, result):
             try:
                 r = result.get()
@@ -122,8 +135,10 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
                 'state': task.state,
                 'result_url': '%s/output/clusrun/%s/raw' % (self.args.host, r.result_key) if r else ''
             }
+
         tasks = self.api.get_clusrun_tasks(job.id)
         task_results = [(t, self.api.get_clusrun_task_result(job.id, t.id, async=True)) for t in tasks]
+        wait(task_results)
         results = [get_result(t[0], t[1]) for t in task_results]
         print_table(['id', 'node', 'state', 'result_url'], results)
 
