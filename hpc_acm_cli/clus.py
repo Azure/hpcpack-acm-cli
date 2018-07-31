@@ -112,16 +112,21 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
         self.list_tasks(job)
 
     def list_tasks(self, job):
-        def wait(tasks):
+        def progress(tasks):
             total = len(tasks)
             ready = 0
+            while ready < total:
+                s = sum(t.ready() for t in tasks)
+                yield s - ready
+                ready = s
+
+        def wait(tasks):
+            total = len(tasks)
             with tqdm(total=total) as prog:
                 prog.set_description("Loading tasks")
-                while ready < total:
+                for s in progress(tasks):
+                    prog.update(s)
                     time.sleep(0.1)
-                    s = sum(t[1].ready() for t in tasks)
-                    prog.update(s - ready)
-                    ready = s
                 prog.clear()
 
         def get_result(task, result):
@@ -137,9 +142,9 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
             }
 
         tasks = self.api.get_clusrun_tasks(job.id)
-        task_results = [(t, self.api.get_clusrun_task_result(job.id, t.id, async=True)) for t in tasks]
+        task_results = [self.api.get_clusrun_task_result(job.id, t.id, async=True) for t in tasks]
         wait(task_results)
-        results = [get_result(t[0], t[1]) for t in task_results]
+        results = [get_result(t[0], t[1]) for t in zip(tasks, task_results)]
         print_table(['id', 'node', 'state', 'result_url'], results)
 
     def new(self):
