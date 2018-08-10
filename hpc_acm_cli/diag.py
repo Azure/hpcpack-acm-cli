@@ -78,15 +78,13 @@ For help of a subcommand(tests|list|show|new|cancel), execute "%(prog)s {subcomm
                             {
                                 'name': '--nodes',
                                 'options': {
-                                    'help': 'names of nodes to be tested. Either this or the --pattern parameter must be provided.',
-                                    'metavar': 'node',
-                                    'nargs': '+'
+                                    'help': 'names of nodes. Multiple names are separated by spaces and quoted as one string, like "node1 node2 node3". Either this or the --pattern parameter must be provided.',
                                 }
                             },
                             {
                                 'name': '--pattern',
                                 'options': {
-                                    'help': 'name pattern of nodes to be tested. Either this or the --nodes parameter must be provided.',
+                                    'help': 'name pattern of nodes. Either this or the --nodes parameter must be provided.',
                                     'default': config.get('DEFAULT', 'pattern', fallback=None)
                                 }
                             },
@@ -143,7 +141,7 @@ For help of a subcommand(tests|list|show|new|cancel), execute "%(prog)s {subcomm
 
     def new(self):
         if self.args.nodes:
-            nodes = self.args.nodes
+            nodes = self.args.nodes.split()
         elif self.args.pattern:
             all = self.api.get_nodes(count=1000000)
             names = [n.name for n in all]
