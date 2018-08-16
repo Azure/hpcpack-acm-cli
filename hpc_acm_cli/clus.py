@@ -148,6 +148,8 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
 
     def show_task_results(self, job):
         def waiter():
+            sys.stderr.write('.')
+            sys.stderr.flush()
             time.sleep(0.1)
 
         tasks = self.wait_tasks(job)
@@ -155,7 +157,7 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
             print("No tasks created!")
             return
 
-        task_results = self.wait_task_results(job, tasks)
+        task_results = self.wait_task_results(job, tasks, retry_on_failure=True)
         # Show progress bar?
         for task, result, output in self.task_outputs(job, tasks, task_results, waiter):
             print('#### %s(%s) ####' % (task.node, result.exit_code if result else ''))
@@ -170,80 +172,88 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
                 break
         return tasks
 
-    def wait_task_results(self, job, tasks):
-        def progress(tasks):
-            total = len(tasks)
+    def wait_task_results(self, job, tasks, retry_on_failure=False):
+        total = len(tasks)
+        task_results = [self.api.get_clusrun_task_result(job.id, t.id, async=True) for t in tasks]
+        results = [None for i in range(total)]
+
+        def try_get_results():
+            count = 0
+            for idx, task_result in enumerate(task_results):
+                if results[idx] is None:
+                    if task_result.ready():
+                        try:
+                            r = task_result.get()
+                        except ApiException: # 404
+                            if retry_on_failure:
+                                # No result yet, try again.
+                                task_results[idx] = self.api.get_clusrun_task_result(job.id, tasks[idx].id, async=True)
+                            else:
+                                results[idx] = False
+                                count += 1
+                        else:
+                            results[idx] = r
+                            count += 1
+                else:
+                    count += 1
+            return count
+
+        def progress():
             ready = 0
             while ready < total:
-                s = sum(t.ready() for t in tasks)
+                s = try_get_results()
                 yield s - ready
                 ready = s
 
-        def wait(tasks):
-            total = len(tasks)
+        def wait():
             with tqdm(total=total) as prog:
                 prog.set_description("Loading tasks")
-                for s in progress(tasks):
+                for s in progress():
                     if s > 0:
                         prog.update(s)
                     else:
                         time.sleep(0.1)
                 prog.clear()
 
-        def get_result(result):
-            try:
-                r = result.get()
-            except ApiException: # 404
-                r = None
-            return r
-
-        task_results = [self.api.get_clusrun_task_result(job.id, t.id, async=True) for t in tasks]
-        wait(task_results)
-        return [get_result(r) for r in task_results]
+        wait()
+        return results
 
     def task_outputs(self, job, tasks, task_results, waiter):
-        pages = [self.api.get_clusrun_output_in_page(t.result_key, offset=-1, page_size=2, async=True) if t else None for t in task_results]
-        # Without a list(...), the zip object will surprise you in repeated enumerate(goods)!
-        goods = list(zip(tasks, task_results, pages))
-        total = len(goods)
+        def get_last_page(result_key):
+            return self.api.get_clusrun_output_in_page(result_key, offset=-1, page_size=2, async=True)
+
+        pages = [get_last_page(t.result_key) for t in task_results]
+        total = len(pages)
         done = [False for i in range(total)]
         done_count = 0
         while done_count != total:
             yielded = False
-            for idx, good in enumerate(goods):
+            for idx, page in enumerate(pages):
                 if done[idx]:
-                    continue
-
-                task, result, page = good
-
-                if page is None:
-                    # When no result key availabe
-                    done[idx] = True
-                    done_count += 1
-                    yield (task, None, None)
-                    yielded = True
                     continue
 
                 if not page.ready():
                     # When last page not ready
                     continue
 
+                result = task_results[idx]
                 try:
                     output = page.get()
                 except ApiException as e:
-                    # When exception in getting last page
-                    done[idx] = True
-                    done_count += 1
-                    yield (task, result, None)
-                    yielded = True
+                    # When output is not created(404), try again
+                    pages[idx] = get_last_page(result.result_key)
                     continue
 
-                if output.eof:
+                if not output.eof:
+                    # When output is not over, try again
+                    pages[idx] = get_last_page(result.result_key)
+                else:
                     # When output is over
                     done[idx] = True
                     done_count += 1
-                    text = self.api.get_clusrun_output(result.result_key)
-                    yield (task, result, text)
+                    file = self.api.get_clusrun_output(result.result_key)
+                    with open(file, "r") as f:
+                        yield(tasks[idx], result, f.read())
                     yielded = True
 
             if not yielded:
