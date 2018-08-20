@@ -6,6 +6,7 @@ from tqdm import tqdm
 from hpc_acm.rest import ApiException
 from hpc_acm_cli.command import Command
 from hpc_acm_cli.utils import print_table, match_names, shorten, arrange
+from hpc_acm_cli.async_op import async_wait, AsyncOp
 
 class Clusrun(Command):
     @classmethod
@@ -187,9 +188,94 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
             print("No tasks created yet!")
             return
 
-        task_results = self.wait_task_results(job, tasks)
+        task_results = self.wait_task_results(tasks)
         results = [task_info(t[0], t[1]) for t in zip(tasks, task_results)]
         print_table(['id', 'node', 'state', 'result_url'], results)
+
+    class GetTaskResult(AsyncOp):
+        def __init__(self, api, task):
+            self.api = api
+            self.async_task_result = self.api.get_clusrun_task_result(task.job_id, task.id, async=True)
+            self.task_result = None
+            self.ready = False
+
+        def get_result(self):
+            if self.ready:
+                return self.task_result
+            if not self.async_task_result.ready():
+                raise AsyncOp.NotReady()
+            self.ready = True
+            try:
+                self.task_result = self.async_task_result.get()
+            except ApiException: # 404
+                self.task_result = None
+            return self.task_result
+
+    def wait_task_results(self, tasks):
+        return async_wait([self.__class__.GetTaskResult(self.api, t) for t in tasks])
+
+    class GetTaskOutput(AsyncOp):
+        def __init__(self, api, task):
+            self.api = api
+            self.task = task
+            self.async_task_result = self.get_task_result()
+            self.task_result = None
+            self.async_last_page = None
+            self.async_output = None
+            self.output = None
+            self.ready = False
+
+        def get_task_result(self):
+            return self.api.get_clusrun_task_result(self.task.job_id, self.task.id, async=True)
+
+        def get_last_page(self):
+            return self.api.get_clusrun_output_in_page(self.task_result.result_key, offset=-1, page_size=2, async=True)
+
+        def get_output(self):
+            if not self.async_output.ready():
+                raise AsyncOp.NotReady()
+            file = self.async_output.get()
+            with open(file, "r") as f:
+                self.output = f.read()
+            self.ready = True
+
+        def try_get_last_page(self):
+            if not self.async_last_page.ready():
+                raise AsyncOp.NotReady()
+            try:
+                page = self.async_last_page.get()
+            except ApiException as e:
+                # When output is not created(404), try again
+                self.async_last_page = self.get_last_page()
+            else:
+                if not page.eof:
+                    # When output is not over, try again
+                    self.async_last_page = self.get_last_page()
+                else:
+                    # When output is over
+                    self.async_output = self.api.get_clusrun_output(self.task_result.result_key, async=True)
+
+        def try_get_task_result(self):
+            if not self.async_task_result.ready():
+                raise AsyncOp.NotReady()
+            try:
+                self.task_result = self.async_task_result.get()
+            except ApiException as e:
+                # When task result is not created(404), try again
+                self.async_task_result = self.get_task_result()
+            else:
+                self.async_last_page = self.get_last_page()
+
+        def get_result(self):
+            if self.ready:
+                return (self.task, self.task_result, self.output)
+            elif self.async_output:
+                self.get_output()
+            elif self.async_last_page:
+                self.try_get_last_page()
+            else:
+                self.try_get_task_result()
+            raise AsyncOp.NotReady()
 
     def show_task_outputs(self, job):
         tasks = self.wait_tasks(job)
@@ -197,13 +283,12 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
             print("No tasks created!")
             return
 
-        task_results = self.wait_task_results(job, tasks, retry_on_failure=True)
-
-        def show_output(task, result, output):
-            print('#### %s(%s) ####' % (task.node, result.exit_code if result else ''))
+        def show_output(_, result):
+            task, task_result, output = result
+            print('#### %s(%s) ####' % (task.node, task_result.exit_code))
             print(output or '')
 
-        self.wait_task_outputs(job, tasks, task_results, show_output)
+        async_wait([self.__class__.GetTaskOutput(self.api, t) for t in tasks], show_output)
 
     def wait_tasks(self, job):
         while True:
@@ -213,96 +298,6 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
                 break
             # TODO: Sleep and wait for some time here?
         return tasks
-
-    def wait_task_results(self, job, tasks, retry_on_failure=False):
-        total = len(tasks)
-        task_results = [self.api.get_clusrun_task_result(job.id, t.id, async=True) for t in tasks]
-        results = [None for i in range(total)]
-
-        def try_get_results():
-            count = 0
-            for idx, task_result in enumerate(task_results):
-                if results[idx] is None:
-                    if task_result.ready():
-                        try:
-                            r = task_result.get()
-                        except ApiException: # 404
-                            if retry_on_failure:
-                                # No result yet, try again.
-                                task_results[idx] = self.api.get_clusrun_task_result(job.id, tasks[idx].id, async=True)
-                            else:
-                                results[idx] = False
-                                count += 1
-                        else:
-                            results[idx] = r
-                            count += 1
-                else:
-                    count += 1
-            return count
-
-        def progress():
-            ready = 0
-            while ready < total:
-                s = try_get_results()
-                yield s - ready
-                ready = s
-
-        def wait():
-            with tqdm(total=total) as prog:
-                prog.set_description("Loading tasks")
-                for s in progress():
-                    if s > 0:
-                        prog.update(s)
-                    else:
-                        time.sleep(0.1)
-                prog.clear()
-
-        wait()
-        return results
-
-    def wait_task_outputs(self, job, tasks, task_results, handler):
-        def get_last_page(result_key):
-            return self.api.get_clusrun_output_in_page(result_key, offset=-1, page_size=2, async=True)
-
-        pages = [get_last_page(t.result_key) for t in task_results]
-        total = len(pages)
-        done = [False for i in range(total)]
-        done_count = 0
-        while done_count != total:
-            yielded = False
-            for idx, page in enumerate(pages):
-                if done[idx]:
-                    continue
-
-                if not page.ready():
-                    # When last page not ready
-                    continue
-
-                result = task_results[idx]
-                try:
-                    output = page.get()
-                except ApiException as e:
-                    # When output is not created(404), try again
-                    pages[idx] = get_last_page(result.result_key)
-                    continue
-
-                if not output.eof:
-                    # When output is not over, try again
-                    pages[idx] = get_last_page(result.result_key)
-                else:
-                    # When output is over
-                    done[idx] = True
-                    done_count += 1
-                    file = self.api.get_clusrun_output(result.result_key)
-                    with open(file, "r") as f:
-                        sys.stderr.write('\n')
-                        handler(tasks[idx], result, f.read())
-                    yielded = True
-
-            if not yielded:
-                sys.stderr.write('.')
-                sys.stderr.flush()
-                time.sleep(0.1)
 
 def main():
     Clusrun.run()
