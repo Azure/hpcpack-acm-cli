@@ -2,6 +2,7 @@ from __future__ import print_function
 import sys
 import os.path
 import shutil
+import signal
 import configparser
 import argparse
 from hpc_acm_cli.parser_builder import ParserBuilder
@@ -90,6 +91,7 @@ class Command:
 
     @classmethod
     def run(cls):
+        signal.signal(signal.SIGINT, lambda signum, frame: sys.exit(3))
         try:
             config = cls.read_default_config()
         except FileNotFoundError as e:
