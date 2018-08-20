@@ -192,29 +192,26 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
         print_table(['id', 'node', 'state', 'result_url'], results)
 
     def show_task_outputs(self, job):
-        def waiter():
-            sys.stderr.write('.')
-            sys.stderr.flush()
-            time.sleep(0.1)
-
         tasks = self.wait_tasks(job)
         if not tasks:
             print("No tasks created!")
             return
 
         task_results = self.wait_task_results(job, tasks, retry_on_failure=True)
-        # Show progress bar?
-        for task, result, output in self.task_outputs(job, tasks, task_results, waiter):
+
+        def show_output(task, result, output):
             print('#### %s(%s) ####' % (task.node, result.exit_code if result else ''))
             print(output or '')
 
-    # Show progress bar?
+        self.wait_task_outputs(job, tasks, task_results, show_output)
+
     def wait_tasks(self, job):
         while True:
             job = self.api.get_clusrun_job(job.id)
             tasks = self.api.get_clusrun_tasks(job.id)
             if tasks or job.state in ['Finished', 'Failed', 'Canceled']:
                 break
+            # TODO: Sleep and wait for some time here?
         return tasks
 
     def wait_task_results(self, job, tasks, retry_on_failure=False):
@@ -263,7 +260,7 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
         wait()
         return results
 
-    def task_outputs(self, job, tasks, task_results, waiter):
+    def wait_task_outputs(self, job, tasks, task_results, handler):
         def get_last_page(result_key):
             return self.api.get_clusrun_output_in_page(result_key, offset=-1, page_size=2, async=True)
 
@@ -298,11 +295,14 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
                     done_count += 1
                     file = self.api.get_clusrun_output(result.result_key)
                     with open(file, "r") as f:
-                        yield(tasks[idx], result, f.read())
+                        sys.stderr.write('\n')
+                        handler(tasks[idx], result, f.read())
                     yielded = True
 
             if not yielded:
-                waiter()
+                sys.stderr.write('.')
+                sys.stderr.flush()
+                time.sleep(0.1)
 
 def main():
     Clusrun.run()
