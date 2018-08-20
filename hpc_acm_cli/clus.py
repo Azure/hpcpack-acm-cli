@@ -54,6 +54,13 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
                         'name': 'id',
                         'options': { 'help': 'job id', }
                     },
+                    {
+                        'name': '--snapshot',
+                        'options': {
+                            'help': 'just show a snapshot of the job without tracking its progress and result',
+                            'action': 'store_true'
+                        }
+                    },
                 ],
             },
             {
@@ -84,6 +91,13 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
                         'name': 'command_line',
                         'options': { 'help': 'command to run on nodes', 'metavar': 'command' }
                     },
+                    {
+                        'name': '--snapshot',
+                        'options': {
+                            'help': 'just show a snapshot of the new job without tracking the progress and result',
+                            'action': 'store_true'
+                        }
+                    },
                 ],
             },
             {
@@ -106,8 +120,58 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
 
     def show(self):
         job = self.api.get_clusrun_job(self.args.id)
+        if self.args.snapshot:
+            self.show_snapshot(job)
+        else:
+            self.show_progressing(job)
+
+    def new(self):
+        if self.args.nodes:
+            nodes = self.args.nodes.split()
+        elif self.args.pattern:
+            all = self.api.get_nodes(count=1000000)
+            names = [n.name for n in all]
+            nodes = match_names(names, self.args.pattern)
+        else:
+            raise ValueError('Either nodes or pattern parameter must be provided!')
+
+        job = {
+            "name": "Command@%s" % datetime.datetime.now().isoformat(),
+            "targetNodes": nodes,
+            "commandLine": self.args.command_line,
+        }
+        job = self.api.create_clusrun_job(job = job)
+        if self.args.snapshot:
+            self.show_snapshot(job)
+        else:
+            self.show_progressing(job)
+
+    def cancel(self):
+        for id in self.args.ids:
+            try:
+                self.api.cancel_clusrun_job(id, job = { "request": "cancel" })
+                print("Job %s is canceled." % id)
+            except ApiException as e:
+                print("Failed to cancel job %s. Error:\n" % id, e)
+
+    def print_jobs(self, jobs, in_short=True):
+        target_nodes = {
+            'title': 'Target nodes',
+            'value': lambda j: len(j.target_nodes)
+        }
+        command = {
+            'title': 'Command',
+            'value': lambda j: shorten(j.command_line, 60) if in_short else arrange(j.command_line, 60)
+        }
+        print_table(['id', command, 'state', target_nodes, 'created_at'], jobs)
+
+    def show_snapshot(self, job):
         self.print_jobs([job], in_short=False)
         self.list_tasks(job)
+
+    def show_progressing(self, job):
+        self.print_jobs([job])
+        self.show_task_outputs(job)
 
     def list_tasks(self, job):
         def task_info(task, result):
@@ -127,26 +191,7 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
         results = [task_info(t[0], t[1]) for t in zip(tasks, task_results)]
         print_table(['id', 'node', 'state', 'result_url'], results)
 
-    def new(self):
-        if self.args.nodes:
-            nodes = self.args.nodes.split()
-        elif self.args.pattern:
-            all = self.api.get_nodes(count=1000000)
-            names = [n.name for n in all]
-            nodes = match_names(names, self.args.pattern)
-        else:
-            raise ValueError('Either nodes or pattern parameter must be provided!')
-
-        job = {
-            "name": "Command@%s" % datetime.datetime.now().isoformat(),
-            "targetNodes": nodes,
-            "commandLine": self.args.command_line,
-        }
-        job = self.api.create_clusrun_job(job = job)
-        self.print_jobs([job])
-        self.show_task_results(job)
-
-    def show_task_results(self, job):
+    def show_task_outputs(self, job):
         def waiter():
             sys.stderr.write('.')
             sys.stderr.flush()
@@ -258,25 +303,6 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
 
             if not yielded:
                 waiter()
-
-    def cancel(self):
-        for id in self.args.ids:
-            try:
-                self.api.cancel_clusrun_job(id, job = { "request": "cancel" })
-                print("Job %s is canceled." % id)
-            except ApiException as e:
-                print("Failed to cancel job %s. Error:\n" % id, e)
-
-    def print_jobs(self, jobs, in_short=True):
-        target_nodes = {
-            'title': 'Target nodes',
-            'value': lambda j: len(j.target_nodes)
-        }
-        command = {
-            'title': 'Command',
-            'value': lambda j: shorten(j.command_line, 60) if in_short else arrange(j.command_line, 60)
-        }
-        print_table(['id', command, 'state', target_nodes, 'created_at'], jobs)
 
 def main():
     Clusrun.run()
