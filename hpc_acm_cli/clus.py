@@ -212,7 +212,7 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
             return self.task_result
 
     def wait_task_results(self, tasks):
-        return async_wait([self.__class__.GetTaskResult(self.api, t) for t in tasks])
+        return async_wait([self.__class__.GetTaskResult(self.api, t) for t in tasks], desc='Loading tasks')
 
     class GetTaskOutput(AsyncOp):
         def __init__(self, api, task):
@@ -288,7 +288,7 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
             print('#### %s(%s) ####' % (task.node, task_result.exit_code))
             print(output or '')
 
-        async_wait([self.__class__.GetTaskOutput(self.api, t) for t in tasks], show_output)
+        async_wait([self.__class__.GetTaskOutput(self.api, t) for t in tasks], show_output, desc='Loading task output')
 
     def wait_tasks(self, job):
         while True:

@@ -9,11 +9,11 @@ class AsyncOp:
         pass
 
 # ops is a list of AsyncOp object
-def async_wait(ops, handler=None):
+def async_wait(ops, handler=None, desc=None):
     total = len(ops)
     done = [False for i in range(total)]
     done_count = 0
-    prog = tqdm(total=total)
+    prog = tqdm(total=total, desc=desc)
     results = [None for i in range(total)] if not handler else []
     while done_count != total:
         yielded = False
@@ -28,11 +28,11 @@ def async_wait(ops, handler=None):
                 yielded = True
                 done[idx] = True
                 done_count += 1
-                prog.update(1)
                 if handler:
                     handler(idx, result)
                 else:
                     results[idx] = result
+                prog.update(1)
         if not yielded:
             time.sleep(0.1)
     prog.close()
