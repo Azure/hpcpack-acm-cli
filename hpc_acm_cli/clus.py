@@ -183,7 +183,7 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
                 'result_url': '%s/output/clusrun/%s/raw' % (self.args.host, result.result_key) if result else ''
             }
 
-        tasks = self.api.get_clusrun_tasks(job.id)
+        tasks = self.api.get_clusrun_tasks(job.id, count=len(job.target_nodes))
         if not tasks:
             print("No tasks created yet!")
             return
@@ -293,7 +293,7 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
     def wait_tasks(self, job):
         while True:
             job = self.api.get_clusrun_job(job.id)
-            tasks = self.api.get_clusrun_tasks(job.id)
+            tasks = self.api.get_clusrun_tasks(job.id, count=len(job.target_nodes))
             if tasks or job.state in ['Finished', 'Failed', 'Canceled']:
                 break
             # TODO: Sleep and wait for some time here?
