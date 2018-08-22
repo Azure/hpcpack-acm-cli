@@ -56,9 +56,9 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
                         'options': { 'help': 'job id', }
                     },
                     {
-                        'name': '--snapshot',
+                        'name': '--short',
                         'options': {
-                            'help': 'just show a snapshot of the job without tracking its progress and result',
+                            'help': 'do not show task output',
                             'action': 'store_true'
                         }
                     },
@@ -93,9 +93,9 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
                         'options': { 'help': 'command to run on nodes', 'metavar': 'command' }
                     },
                     {
-                        'name': '--snapshot',
+                        'name': '--short',
                         'options': {
-                            'help': 'just show a snapshot of the new job without tracking the progress and result',
+                            'help': 'do no show task output.',
                             'action': 'store_true'
                         }
                     },
@@ -121,8 +121,8 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
 
     def show(self):
         job = self.api.get_clusrun_job(self.args.id)
-        if self.args.snapshot:
-            self.show_snapshot(job)
+        if self.args.short:
+            self.show_in_short(job)
         else:
             self.show_progressing(job)
 
@@ -142,8 +142,8 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
             "commandLine": self.args.command_line,
         }
         job = self.api.create_clusrun_job(job = job)
-        if self.args.snapshot:
-            self.show_snapshot(job)
+        if self.args.short:
+            self.show_in_short(job)
         else:
             self.show_progressing(job)
 
@@ -166,7 +166,7 @@ For help of a subcommand(list|show|new|cancel), execute "%(prog)s {subcommand} -
         }
         print_table(['id', command, 'state', target_nodes, 'created_at'], jobs)
 
-    def show_snapshot(self, job):
+    def show_in_short(self, job):
         self.print_jobs([job], in_short=False)
         self.list_tasks(job)
 
