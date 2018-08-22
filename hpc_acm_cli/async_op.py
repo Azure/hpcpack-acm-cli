@@ -1,5 +1,6 @@
 from tqdm import tqdm
 import time
+import platform
 
 class AsyncOp:
     class NotReady(Exception):
@@ -13,7 +14,7 @@ def async_wait(ops, handler=None, desc=None):
     total = len(ops)
     done = [False for i in range(total)]
     done_count = 0
-    prog = tqdm(total=total, desc=desc)
+    prog = tqdm(total=total, desc=desc, ascii=(platform.system() == 'Windows'))
     results = [None for i in range(total)] if not handler else []
     while done_count != total:
         yielded = False
