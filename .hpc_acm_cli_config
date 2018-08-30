@@ -1,7 +1,11 @@
 [DEFAULT]
 # API server url, default value for "--host" parameter
 host=http://frontend.westus.azurecontainer.io/v1
+# Username for HTTP Basic Auth
+user=root
+# Password for the user. You can also provide it in command line via the --password parameter.
+# password=xxxxxx
 # Number of items to show in a "list" subcommand, default value for "--count" parameter
-count=25
+count=100
 # Node pattern to "new" subcommand, default value for "--pattern" parameter
 pattern=*

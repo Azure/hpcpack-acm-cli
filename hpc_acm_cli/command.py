@@ -5,6 +5,7 @@ import shutil
 import signal
 import configparser
 import argparse
+import getpass
 from hpc_acm_cli.parser_builder import ParserBuilder
 import hpc_acm
 from hpc_acm.configuration import Configuration
@@ -16,6 +17,23 @@ from hpc_acm.rest import ApiException
 # util.DEFAULT_LOGGING_FORMAT = '[%(levelname)s/%(threadName)s:%(thread)d] %(message)s'
 # util.log_to_stderr(util.DEBUG)
 
+class PasswordPrompt(argparse.Action):
+    def __init__(self, option_strings, dest=None, nargs=0, default=None, required=False, type=None, metavar=None, help=None):
+        super(PasswordPrompt, self).__init__(
+            option_strings=option_strings,
+            dest=dest,
+            nargs=nargs,
+            default=default,
+            required=required,
+            metavar=metavar,
+            type=type,
+            help=help
+        )
+
+    def __call__(self, parser, args, values, option_string=None):
+        password = getpass.getpass()
+        setattr(args, self.dest, password)
+
 class Command:
     config_file_name = '.hpc_acm_cli_config'
     config_dir = os.path.expanduser('~')
@@ -24,6 +42,8 @@ class Command:
     def __init__(self, args):
         config = Configuration()
         config.host = args.host
+        config.username = args.user or ''
+        config.password = args.password or ''
         api_client = ApiClient(config)
         self.api = hpc_acm.DefaultApi(api_client)
         self.args = args
@@ -53,6 +73,14 @@ class Command:
             {
                 'name': '--host', # NOTE: "--base-point" seems a more meaningful name.
                 'options': { 'help': 'the API end point', 'default': config.get('DEFAULT', 'host', fallback=None) }
+            },
+            {
+                'name': '--user',
+                'options': { 'help': 'the authorized user for the API end point', 'default': config.get('DEFAULT', 'user', fallback=None) }
+            },
+            {
+                'name': '--password',
+                'options': { 'help': 'the user password', 'default': config.get('DEFAULT', 'password', fallback=None), 'action': PasswordPrompt }
             },
         ]
         params = cls.params(config)
