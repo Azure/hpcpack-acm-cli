@@ -48,22 +48,23 @@ class Command:
         options.update(cls.profile())
         spec = {
             'options': options,
-            'params': [
-                {
-                    'name': '--host',
-                    'options': { 'help': 'set the API end point', 'default': config.get('DEFAULT', 'host', fallback=None) }
-                },
-            ],
         }
+        common_params = [
+            {
+                'name': '--host', # NOTE: "--base-point" seems a more meaningful name.
+                'options': { 'help': 'the API end point', 'default': config.get('DEFAULT', 'host', fallback=None) }
+            },
+        ]
         params = cls.params(config)
         if params:
-            spec['params'] += params
+            spec['params'] = common_params + params
         subcommands = cls.subcommands(config)
         if subcommands:
             for e in subcommands:
                 options = { 'formatter_class': argparse.ArgumentDefaultsHelpFormatter }
                 options.update(e['options'])
                 e['options'] = options
+                e['params'] = common_params + e['params']
             spec['subcommands'] = {
                 'options': {
                     'dest': 'command' # args.command
