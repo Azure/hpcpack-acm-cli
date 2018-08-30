@@ -120,7 +120,7 @@ class Command:
 
     @classmethod
     def run(cls):
-        signal.signal(signal.SIGINT, lambda signum, frame: sys.exit(3))
+        signal.signal(signal.SIGINT, lambda signum, frame: sys.exit(100))
         try:
             config = cls.read_default_config()
         except FileNotFoundError as e:
@@ -143,7 +143,7 @@ class Command:
                 print('Error: %s' % e)
                 parser.print_help()
                 sys.exit(1)
-            except ApiException as e:
+            except Exception as e:
                 print('Error: %s' % e)
                 sys.exit(2)
         else:
