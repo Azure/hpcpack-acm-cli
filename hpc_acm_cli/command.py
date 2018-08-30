@@ -100,13 +100,14 @@ class Command:
         spec = cls.build_spec(config)
         parser = ParserBuilder.build(spec)
         args = parser.parse_args()
-        obj = cls(args)
         cmd = getattr(args, 'command', None)
         if cmd:
-            cmd = getattr(obj, cmd)
+            got = getattr(cls, cmd)
         else:
-            cmd = getattr(obj, 'main', None)
-        if cmd:
+            got = getattr(cls, 'main', None)
+        if got:
+            obj = cls(args)
+            cmd = getattr(obj, cmd)
             try:
                 cmd()
             except ValueError as e:
