@@ -61,8 +61,11 @@ For help of a subcommand(tests|list|show|new|cancel), execute "%(prog)s {subcomm
                         'options': { 'help': 'job id', }
                     },
                     {
-                        'name': '--wait',
-                        'options': { 'help': 'wait a job until it\'s over', 'action': 'store_true' }
+                        'name': '--short',
+                        'options': {
+                            'help': 'do not wait job over',
+                            'action': 'store_true'
+                        }
                     },
                 ],
             },
@@ -96,6 +99,13 @@ For help of a subcommand(tests|list|show|new|cancel), execute "%(prog)s {subcomm
                             'help': 'test to run, e.g. "mpi-pingpong". For available tests, resort to the "tests" subcommand.',
                         }
                     },
+                    {
+                        'name': '--short',
+                        'options': {
+                            'help': 'do not wait job over',
+                            'action': 'store_true'
+                        }
+                    },
                 ],
             },
             {
@@ -122,22 +132,10 @@ For help of a subcommand(tests|list|show|new|cancel), execute "%(prog)s {subcomm
 
     def show(self):
         job = self.api.get_diagnostic_job(self.args.id)
-        if self.args.wait:
-            state = job.state
-            while not state in ['Finished', 'Failed', 'Canceled']:
-                sys.stdout.write('.')
-                sys.stdout.flush()
-                time.sleep(1)
-                job = self.api.get_diagnostic_job(self.args.id)
-                state = job.state
-            print('\n')
-        self.print_jobs([job])
-        try:
-            result = self.api.get_diagnostic_job_aggregation_result(self.args.id)
-        except ApiException: # 404 when aggregation result is not ready
-            result = None
-        if result:
-            self.print_agg_result(job, result)
+        if self.args.short:
+            self.show_in_short(job)
+        else:
+            self.show_progressing(job)
 
     def new(self):
         if self.args.nodes:
@@ -158,7 +156,10 @@ For help of a subcommand(tests|list|show|new|cancel), execute "%(prog)s {subcomm
             },
         }
         job = self.api.create_diagnostic_job(job = job)
-        self.print_jobs([job])
+        if self.args.short:
+            self.show_in_short(job)
+        else:
+            self.show_progressing(job)
 
     def cancel(self):
         for id in self.args.ids:
@@ -167,6 +168,29 @@ For help of a subcommand(tests|list|show|new|cancel), execute "%(prog)s {subcomm
                 print("Job %s is canceled." % id)
             except ApiException as e:
                 print("Failed to cancel job %s. Error:\n" % id, e)
+
+    def show_in_short(self, job):
+        self.print_jobs([job])
+        try:
+            result = self.api.get_diagnostic_job_aggregation_result(job.id)
+        except ApiException: # 404 when aggregation result is not ready
+            pass
+        else:
+            self.print_agg_result(job, result)
+
+    def show_progressing(self, job):
+        state = job.state
+        end_states = ['Finished', 'Failed', 'Canceled']
+        if state not in end_states:
+            self.print_jobs([job])
+            while not state in end_states:
+                sys.stdout.write('.')
+                sys.stdout.flush()
+                time.sleep(1)
+                job = self.api.get_diagnostic_job(job.id)
+                state = job.state
+            print('\n')
+        self.show_in_short(job)
 
     def print_tests(self, tests):
         test = {
