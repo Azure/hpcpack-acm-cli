@@ -90,9 +90,9 @@ class Command:
         if subcommands:
             for e in subcommands:
                 options = { 'formatter_class': argparse.ArgumentDefaultsHelpFormatter }
-                options.update(e['options'])
+                options.update(e.get('options', {}))
                 e['options'] = options
-                e['params'] = common_params + e['params']
+                e['params'] = common_params + e.get('params', [])
             spec['subcommands'] = {
                 'options': {
                     'dest': 'command' # args.command
