@@ -8,7 +8,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="hpc_acm_cli",
-    version="2.5.0",
+    version="2.6.0",
     author="Robert Zhang",
     description="HPC ACM client",
     long_description=long_description,
