@@ -12,6 +12,12 @@ from hpc_acm.configuration import Configuration
 from hpc_acm.api_client import ApiClient
 from hpc_acm.rest import ApiException
 
+# Turn off warning for unverified SSL certificate, but still allow user to turn
+# it on by setting envrionment variable "PYTHONWARNINGS=default".
+import warnings
+if not sys.warnoptions:
+    warnings.simplefilter("ignore")
+
 # See https://github.com/swagger-api/swagger-codegen/issues/8504
 # from multiprocessing import util
 # util.DEFAULT_LOGGING_FORMAT = '[%(levelname)s/%(threadName)s:%(thread)d] %(message)s'
@@ -44,6 +50,7 @@ class Command:
         config.host = args.host
         config.username = args.user or ''
         config.password = args.password or ''
+        config.verify_ssl = False
         api_client = ApiClient(config)
         self.api = hpc_acm.DefaultApi(api_client)
         self.args = args
