@@ -3,10 +3,10 @@ import sys
 import os.path
 import shutil
 import signal
-import configparser
 import argparse
 import getpass
 from hpc_acm_cli.parser_builder import ParserBuilder
+from hpc_acm_cli.easy_config import EasyConfig
 import hpc_acm
 from hpc_acm.configuration import Configuration
 from hpc_acm.api_client import ApiClient
@@ -120,7 +120,7 @@ class Command:
     @classmethod
     def read_default_config(cls):
         cls.ensure_default_config()
-        config = configparser.ConfigParser()
+        config = EasyConfig()
         if not config.read(cls.config_path):
             raise FileNotFoundError('Config file %s is not found!' % args.config)
         return config
@@ -131,7 +131,7 @@ class Command:
         try:
             config = cls.read_default_config()
         except FileNotFoundError as e:
-            config = configparser.ConfigParser()
+            config = EasyConfig()
             print(e, file=sys.stderr)
         spec = cls.build_spec(config)
         parser = ParserBuilder.build(spec)
