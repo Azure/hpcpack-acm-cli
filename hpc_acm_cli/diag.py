@@ -215,7 +215,7 @@ For help of a subcommand(tests|list|show|new|cancel), execute "%(prog)s {subcomm
         print_table(['id', test, 'state', target_nodes, 'created_at'], jobs)
 
     def print_agg_result(self, job, result):
-        if isinstance(result, str):
+        if isinstance(result, str) or isinstance(result, unicode):
             result = json.loads(result)
         if job.diagnostic_test.category == 'mpi' and job.diagnostic_test.name == 'pingpong':
             self.print_mpi_pingpong_result(result)
