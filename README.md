@@ -1,21 +1,32 @@
-# hpc-acm-cli
+# HPC ACM CLI
 
 HPC diagnostic client tools based on HPC ACM API.
 
-## Dependencies
+## Prerequisites
 
-* Python 3.0 or higher, but less than 3.7. That's due to the dependent package hpc_acm. It's expected to be fixed soon.
+* Python version 2.7 or higher, but less than 3.7.
 * [hpc_acm](https://github.com/coin8086/hpc_acm_api). Install it by `pip3 install -e git+https://github.com/coin8086/hpc_acm_api.git#egg=hpc-acm`
 
 ## Installation
 
-To install locally from source, execute
+### Install from Source
+
+To install locally from source, execute the following command:
 
 ```
-pip3 install -e .
+pip3 install -e <path-to-the-source-dir>
 ```
 
-under the root of the source dir.
+Note:
+
+* `pip3` is the pip for Python3 on Debian/Ubuntu. It may be `pip`, or `pip2` for other Linux distributions, BSD and Windows, or for Python2. 
+* If you install it for Python2 by `pip` or `pip2`, you may need an addtional argument `--user` to install it within your home, like: 
+  ```
+  pip install --user -e <path-to-the-source-dir>
+  ```
+* `pip3` applies `--user` by default.
+
+### Install from GitHub
 
 To install the latest release version from GitHub, execute
 
@@ -29,7 +40,7 @@ To install the latest code in development, execute
 pip3 install -e git+https://github.com/coin8086/hpc_acm_cli.git#egg=hpc-acm-cli
 ```
 
-`pip3` is the pip for Python3 on Debian/Ubuntu. It may be just `pip` on other Linux distributions and Windows.
+Here, again, `pip3` may be `pip` or `pip2`, see notes in [Install from source](#install-from-Source).
 
 ### Special Notes for CentOS/SCL
 
@@ -48,10 +59,12 @@ You're assumed to have installed Python `rh-python36`. If not, replace it with y
 
 ## Usage
 
-After installation, there're 3 commands avaiable: `clusnode`, `clusdiag` and `clusrun` for cluster nodes, diagnostic jobs and general commands separately. They each have some subcommands, such as `list` and `show`, etc. Execute them with `-h` paramter for help message, like `clusnode -h`.
+After installation, there're 3 commands avaiable: `clusnode`, `clusdiag` and `clusrun` for cluster nodes, diagnostic jobs and general commands separately. They each have subcommands, such as `list` and `show`, etc. Execute them with `-h` paramter for help message, like `clusnode -h`.
 
 ## Config
 
-The commands share a common config file, `.hpc_acm_cli_config`, which is under the user's home directory(~). Usually, it's `/home/{username}` for Linux, and `c:\users\{username}` for Windows.
+The above commands share a common config file, `.hpc_acm_cli_config`, which is under the user's home directory(~). Usually, it's `/home/{username}` for Linux, and `c:\users\{username}` for Windows.
 
-The config file can set default values for parameters of the commands. See comments in default(initial) config file for details. The default values are overriden by values from command line.
+Note: the config file will be generated at the first time when you run any of the commands.
+
+The config file can set default values for parameters of the commands. See comments in the config file for details. The default values set in config are overriden by values from command line.
