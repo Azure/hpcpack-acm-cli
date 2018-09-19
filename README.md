@@ -5,7 +5,7 @@ HPC diagnostic tools based on HPC ACM API.
 ## Prerequisites
 
 * Python version 2.7 or higher, but less than 3.7.
-* [hpcpack-acm-api-python](https://github.com/coin8086/hpcpack-acm-api-python). Install it by `pip3 install -e git+https://github.com/coin8086/hpcpack-acm-api-python.git#egg=hpc-acm`
+* [hpcpack-acm-api-python](https://github.com/Azure/hpcpack-acm-api-python). Install it by `pip3 install -e git+https://github.com/Azure/hpcpack-acm-api-python.git#egg=hpc-acm`
 
 ## Installation
 
@@ -19,8 +19,8 @@ pip3 install -e <path-to-the-source-dir>
 
 Note:
 
-* `pip3` is the pip for Python3 on Debian/Ubuntu. It may be `pip`, or `pip2` for other Linux distributions, BSD and Windows, or for Python2. 
-* If you install it for Python2 by `pip` or `pip2`, you may need an addtional argument `--user` to install it within your home, like: 
+* `pip3` is the pip for Python3 on Debian/Ubuntu. It may be `pip`, or `pip2` for other Linux distributions, BSD and Windows, or for Python2.
+* If you install it for Python2 by `pip` or `pip2`, you may need an addtional argument `--user` to install it within your home, like:
   ```
   pip install --user -e <path-to-the-source-dir>
   ```
@@ -31,13 +31,13 @@ Note:
 To install the latest release version from GitHub, execute
 
 ```
-pip3 install -e git+https://github.com/coin8086/hpcpack-acm-cli.git@release#egg=hpc-acm-cli
+pip3 install -e git+https://github.com/Azure/hpcpack-acm-cli.git@release#egg=hpc-acm-cli
 ```
 
 To install the latest code in development, execute
 
 ```
-pip3 install -e git+https://github.com/coin8086/hpcpack-acm-cli.git#egg=hpc-acm-cli
+pip3 install -e git+https://github.com/Azure/hpcpack-acm-cli.git#egg=hpc-acm-cli
 ```
 
 Here, again, `pip3` may be `pip` or `pip2`, see notes in [Install from source](#install-from-Source).
@@ -52,7 +52,7 @@ Do it like this:
 sudo su root
 # yum install rh-python36
 scl enable rh-python36 bash
-pip install -e git+https://github.com/coin8086/hpcpack-acm-cli.git#egg=hpc-acm-cli
+pip install -e git+https://github.com/Azure/hpcpack-acm-cli.git#egg=hpc-acm-cli
 ```
 
 You're assumed to have installed Python `rh-python36`. If not, replace it with yours. Also note that `pip` in above code refers to Python3's pip, and thus no need of `pip3`.
