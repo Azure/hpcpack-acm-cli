@@ -10,19 +10,13 @@ else:
             try:
                 value = ConfigParser.get(self, section, option)
             except (NoSectionError, NoOptionError):
-                if fallback is None:
-                    raise
-                else:
-                    value = fallback
+                value = fallback
             return value
 
         def getint(self, section, option, fallback=None):
             try:
                 value = ConfigParser.getint(self, section, option)
             except (NoSectionError, NoOptionError):
-                if fallback is None:
-                    raise
-                else:
-                    value = fallback
-            return value
+                value = fallback
+            return int(value)
 
