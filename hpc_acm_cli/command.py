@@ -113,8 +113,7 @@ class Command:
     @classmethod
     def ensure_default_config(cls):
         if not os.path.exists(cls.config_path):
-            path = sys.modules['hpc_acm_cli'].__file__
-            dist_path = os.path.dirname(os.path.dirname(path))
+            dist_path = sys.modules['hpc_acm_cli'].__path__[0]
             shutil.copyfile(os.path.join(dist_path, cls.config_file_name), cls.config_path)
 
     @classmethod

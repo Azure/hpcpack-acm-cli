@@ -26,12 +26,11 @@ setuptools.setup(
             'clusdiag=hpc_acm_cli.diag:main',
         ],
     },
-    data_files=[
-        # In fact, it doesn't work as expected, that is to copy the config to user's home dir.
-        # That's due to an issue of Python setup tools. See
-        # https://stackoverflow.com/questions/47460804/copy-configuration-file-on-installation
-        # for more details. The workaround is to copy the file at runtime.
-        (os.path.expanduser('~'), ['.hpc_acm_cli_config']),
-    ],
+    # NOTE: DO NOT rely on "data_files" since it's very buggy and confusing. See the
+    # following link for more info.
+    # https://stackoverflow.com/questions/47460804/copy-configuration-file-on-installation
+    package_data={
+        'hpc_acm_cli': ['.hpc_acm_cli_config']
+    },
     install_requires=requires
 )
