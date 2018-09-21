@@ -33,7 +33,7 @@ python -m pip install --user git+https://github.com/Azure/hpcpack-acm-cli.git#eg
 Get the source code to local and then execute
 
 ```
-python -m pip install --user -e <path-to-the-source-direcotry>
+python -m pip install --user -e <path-to-the-source-directory>
 ```
 
 Note: the `-e` option enable the "editable" mode for the package so that any change you do in the source will take effect without reinstallation.
