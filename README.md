@@ -1,16 +1,10 @@
 # HPC ACM CLI
 
-HPC diagnostic tools based on HPC ACM API.
+HPC Pack ACM diagnostic tools based on [HPC Pack ACM API](https://github.com/Azure/hpcpack-acm-api-python).
 
 ## Prerequisites
 
-Python version 2.7 or higher, but less than 3.7.
-
-## Dependencies
-
-[hpcpack-acm-api-python](https://github.com/Azure/hpcpack-acm-api-python).
-
-This will be installed automatically when you install the CLI package.
+Python 2.7, 3.5 or 3.6.
 
 ## Installation
 
@@ -33,6 +27,16 @@ You can install the latest code in development from GitHub by
 ```
 python -m pip install --user git+https://github.com/Azure/hpcpack-acm-cli.git#egg=hpc-acm-cli
 ```
+
+### Install from Source
+
+Get the source code to local and then execute
+
+```
+python -m pip install --user -e <path-to-the-source-direcotry>
+```
+
+Note: the `-e` option enable the "editable" mode for the package so that any change you do in the source will take effect without reinstallation.
 
 ## Usage
 
