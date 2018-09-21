@@ -8,7 +8,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="hpc_acm_cli",
-    version="2.7.12",
+    version="2.7.13",
     author="Microsoft HPC Pack",
     author_email="hpccoree@microsoft.com",
     url="https://github.com/Azure/hpcpack-acm-cli",

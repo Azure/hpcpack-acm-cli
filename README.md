@@ -4,69 +4,60 @@ HPC diagnostic tools based on HPC ACM API.
 
 ## Prerequisites
 
-* Python version 2.7 or higher, but less than 3.7.
-* [hpcpack-acm-api-python](https://github.com/Azure/hpcpack-acm-api-python). Install it by `pip3 install  git+https://github.com/Azure/hpcpack-acm-api-python.git#egg=hpc-acm`
+Python version 2.7 or higher, but less than 3.7.
+
+## Dependencies
+
+[hpcpack-acm-api-python](https://github.com/Azure/hpcpack-acm-api-python).
+
+This will be installed automatically when you install the CLI package.
 
 ## Installation
 
-### Install from Source
+There're several ways to installation. Usually, you should use the PyPI way. Other ways are mainly for development purpose.
 
-To install locally from source, execute the following command:
+### Install from PyPI
+
+The standard way to install the Python package is
 
 ```
-pip3 install <path-to-the-source-dir>
+python -m pip install --user hpc-acm-cli
 ```
 
-Note:
-
-* `pip3` is the pip for Python3 on Debian/Ubuntu. It may be `pip`, or `pip2` for other Linux distributions, BSD and Windows, or for Python2.
-* If you install it for Python2 by `pip` or `pip2`, you may need an addtional argument `--user` to install it within your home, like:
-  ```
-  pip install --user <path-to-the-source-dir>
-  ```
-* `pip3` applies `--user` by default.
+Note: `python` may be `python2` or `python3` for Python 2 or Python 3 on some Linux distributions.
 
 ### Install from GitHub
 
-To install a release version, say, "v2.7.0" from GitHub, execute
+You can install the latest code in development from GitHub by
 
 ```
-pip3 install git+https://github.com/Azure/hpcpack-acm-cli.git@v2.7.0#egg=hpc-acm-cli
+python -m pip install --user git+https://github.com/Azure/hpcpack-acm-cli.git#egg=hpc-acm-cli
+```
+
+You can also pick a release version, say, "v2.7.0" from GitHub, by
+
+```
+python -m pip install --user git+https://github.com/Azure/hpcpack-acm-cli.git@v2.7.0#egg=hpc-acm-cli
 ```
 
 See [here](https://github.com/Azure/hpcpack-acm-cli/releases) for more releases.
 
-To install the latest code in development, execute
+### Install from Source
+
+First get the source code to local, and then execute the following command
 
 ```
-pip3 install git+https://github.com/Azure/hpcpack-acm-cli.git#egg=hpc-acm-cli
+python -m pip install --user <path-to-the-source-dir>
 ```
-
-Here, again, `pip3` may be `pip` or `pip2`, see notes in [Install from source](#install-from-Source).
-
-### Special Notes for CentOS/SCL
-
-If you enabled Software Collection(SCL) and installed Python under it, like [this artical](https://linuxize.com/post/how-to-install-python-3-on-centos-7/) said, you may have to enable SCL as *root* to install the package, otherwise you will encounter a "Permission denied" error.
-
-Do it like this:
-
-```
-sudo su root
-# yum install rh-python36
-scl enable rh-python36 bash
-pip install git+https://github.com/Azure/hpcpack-acm-cli.git#egg=hpc-acm-cli
-```
-
-You're assumed to have installed Python `rh-python36`. If not, replace it with yours. Also note that `pip` in above code refers to Python3's pip, and thus no need of `pip3`.
 
 ## Usage
 
-After installation, there're 3 commands avaiable: `clusnode`, `clusdiag` and `clusrun` for cluster nodes, diagnostic jobs and general commands separately. They each have subcommands, such as `list` and `show`, etc. Execute them with `-h` paramter for help message, like `clusnode -h`.
+After installation, there're 3 commands avaiable: `clusnode`, `clusdiag` and `clusrun` for cluster nodes, diagnostic jobs and general commands separately. They each have subcommands, such as `list`, `show` `new`, etc. for a type of resource. Execute a command with `-h` paramter for help message, like `clusnode -h`.
 
-## Config
+## Configuration
 
-The above commands share a common config file, `.hpc_acm_cli_config`, which is under the user's home directory(~). Usually, it's `/home/{username}` for Linux, and `c:\users\{username}` for Windows.
+The above commands share a common configuration file, `.hpc_acm_cli_config`, for default values for the command line.
 
-Note: the config file will be generated at the first time when you run any of the commands.
+The file will be generated at the first time you run any of the commands. It will be put under the user's home directory(~). Typically, it's `/home/{username}` for Linux, and `C:\Users\{username}` for Windows.
 
-The config file can set default values for parameters of the commands. See comments in the config file for details. The default values set in config are overriden by values from command line.
+The configuration file sets default values for comamnd parameters, and the default values can be overriden by those provided on command line. See comments in the file for configurable options and examples.
