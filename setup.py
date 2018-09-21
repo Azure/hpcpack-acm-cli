@@ -1,21 +1,27 @@
 import setuptools
 import os.path
 
-requires = ["terminaltables >= 3.1.0", "tqdm >= 4.24.0"]
+requires = ["hpc-acm >= 1.0.0", "terminaltables >= 3.1.0", "tqdm >= 4.24.0"]
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
     name="hpc_acm_cli",
-    version="2.7.0",
-    author="Robert Zhang",
-    description="HPC ACM client",
+    version="2.7.12",
+    author="Microsoft HPC Pack",
+    author_email="hpccoree@microsoft.com",
+    url="https://github.com/Azure/hpcpack-acm-cli",
+    description="HPC ACM Client",
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(),
     classifiers=(
+        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ),
