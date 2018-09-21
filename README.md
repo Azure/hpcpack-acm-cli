@@ -34,22 +34,6 @@ You can install the latest code in development from GitHub by
 python -m pip install --user git+https://github.com/Azure/hpcpack-acm-cli.git#egg=hpc-acm-cli
 ```
 
-You can also pick a release version, say, "v2.7.0" from GitHub, by
-
-```
-python -m pip install --user git+https://github.com/Azure/hpcpack-acm-cli.git@v2.7.0#egg=hpc-acm-cli
-```
-
-See [here](https://github.com/Azure/hpcpack-acm-cli/releases) for more releases.
-
-### Install from Source
-
-First get the source code to local, and then execute the following command
-
-```
-python -m pip install --user <path-to-the-source-dir>
-```
-
 ## Usage
 
 After installation, there're 3 commands avaiable: `clusnode`, `clusdiag` and `clusrun` for cluster nodes, diagnostic jobs and general commands separately. They each have subcommands, such as `list`, `show` `new`, etc. for a type of resource. Execute a command with `-h` paramter for help message, like `clusnode -h`.
