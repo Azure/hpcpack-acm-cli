@@ -69,7 +69,7 @@ There's also a parameter `--last-id` for paging. Refer to command help for more.
 To check a specific node
 
 ```
-clusnode show <node-name> ...
+clusnode show <node-name>
 ```
 
 ### clusdiag
