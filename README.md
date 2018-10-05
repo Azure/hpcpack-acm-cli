@@ -38,7 +38,7 @@ python -m pip install --user -e <path-to-the-source-directory>
 
 Note: the `-e` option enable the "editable" mode for the package so that any change you do in the source will take effect without reinstallation.
 
-## Usage
+## Usage on Linux based Distros
 
 After installation, there're 3 commands avaiable: `clusnode`, `clusdiag` and `clusrun` for checking cluster nodes, checking/doing diagnostic jobs and checking/running general command separately. They each have subcommands, such as `list`, `show` `new`, etc..
 
@@ -47,20 +47,31 @@ After installation, there're 3 commands avaiable: `clusnode`, `clusdiag` and `cl
 * All these commands require some common parameters. They're `--host`, `--user` and `--password`. You can save the values for them in a configuration file and thus avoid entering them each time you run a command. See configuration section below for more.
 * The example command lines below assumes you have the required parameters provided in the configuration file. Otherwise you'll encounter an error at runtime.
 
-### clusnode
+## Usage on Windows
 
-clusnode is for checking cluster nodes.
+Goto `C:\Users\{UserName}\AppData\Roaming\Python\{PythonVersion}\site-packages\hpc_acm_cli` to find dedicated programs mentioned below.
+If you're not able to locate, please do the following to know the package installation directory :
+
+- open python interpreter
+- type `import hpc_acm_cli`
+- enter `hpc_acm_cli.__file__` to know the package installation directory.
+
+After installation, there're 3 commands avaiable: `node.py`, `diag.py` and `clus.py` for checking cluster nodes, checking/doing diagnostic jobs and checking/running general command separately. They each have subcommands, such as `list`, `show` `new`, etc..
+
+### node.py
+
+node.py is for checking cluster nodes.
 
 For example, to list the nodes in a cluster, execute
 
 ```
-clusnode list
+node.py list
 ```
 
 By default, it will list 100 nodes at once. If you prefer more, use the `--count` parameter, like
 
 ```
-clusnode list --count 1000
+node.py list --count 1000
 ```
 
 There's also a parameter `--last-id` for paging. Refer to command help for more.
@@ -69,23 +80,23 @@ There's also a parameter `--last-id` for paging. Refer to command help for more.
 To check a specific node
 
 ```
-clusnode show <node-name>
+node.py show <node-name>
 ```
 
-### clusdiag
+### diag.py
 
-clusdiag is for checking/doing diagnostic tests on a cluster.
+diag.py is for checking/doing diagnostic tests on a cluster.
 
 For example, to list available diagnostic tests
 
 ```
-clusdiag tests
+diag.py tests
 ```
 
 To run a diagnostic test
 
 ```
-clusdiag new <test-name> --pattern <your-node-name-pattern>
+diag.py new <test-name> --pattern <your-node-name-pattern>
 ```
 
 The `--pattern` is a glob pattern just like the file name globbing on most OSes. For example, `abc*` matches names starting with `abc`, and thus `abc`, `abc1` and `abc2` are all matched. You can use `*` to match all nodes.
@@ -93,7 +104,7 @@ The `--pattern` is a glob pattern just like the file name globbing on most OSes.
 You can also specify several nodes to run the test, by the `--nodes` parameter, like
 
 ```
-clusdiag new <test-name> --nodes "n1 n2 n3"
+diag.py new <test-name> --nodes "n1 n2 n3"
 ```
 
 The nodes named `n1`, `n2` and `n3` are specified, spearated by a space and qouted in a pair of `"`.
@@ -101,23 +112,23 @@ The nodes named `n1`, `n2` and `n3` are specified, spearated by a space and qout
 To see a list of diagnostic tests
 
 ```
-clusdiag list
+diag.py list
 ```
 
 To check detailed result of a test
 
 ```
-clusdiag show <id>
+diag.py show <id>
 ```
 
-### clusrun
+### clus.py
 
-clusrun is for checking/running general command on a cluster.
+clus.py is for checking/running general command on a cluster.
 
 For example, to run a command on all nodes of the cluster:
 
 ```
-clusrun new --pattern "*" "hostname && date"
+clus.py new --pattern "*" "hostname && date"
 ```
 
 It will execute `hostname && date` on all nodes in a cluster.
@@ -127,6 +138,6 @@ It will execute `hostname && date` on all nodes in a cluster.
 
 The above commands share a common configuration file, `.hpc_acm_cli_config`, for default values for the command line.
 
-The file will be generated at the first time you run any of the commands. It will be put under the user's home directory(~). Typically, it's `/home/{username}` for Linux, and `C:\Users\{username}` for Windows.
+The file will be generated at the first time you run any of the commands. It will be put under the user's home directory(~). Typically, it's `/home/{username}` for Linux, and `C:\Users\{username}` for Windows. (check in `C:\Users\{UserName}\AppData\Roaming\Python\{PythonVersion}\site-packages\hpc_acm_cli` if it's not there in `C:\Users\{username}`)
 
 The configuration file sets default values for command parameters, and the default values can be overriden by those provided on command line. See comments in the file for configurable options and examples.
