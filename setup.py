@@ -1,14 +1,14 @@
 import setuptools
 import os.path
 
-requires = ["hpc-acm >= 1.0.0", "terminaltables >= 3.1.0", "tqdm >= 4.24.0"]
+requires = ["hpc-acm >= 1.0.0", "terminaltables >= 3.1.0", "tqdm >= 4.24.0", "adal >= 1.2.0"]
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
     name="hpc_acm_cli",
-    version="2.7.14",
+    version="2.8.0",
     author="Microsoft HPC Pack",
     author_email="hpccoree@microsoft.com",
     url="https://github.com/Azure/hpcpack-acm-cli",

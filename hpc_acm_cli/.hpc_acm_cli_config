@@ -1,11 +1,18 @@
 [DEFAULT]
+# Azure Tenant
+# tenant=xxx.onmicrosoft.com
+
+# App id of Azure AD
+# appid=xxx
+
+# App secrect
+# appsecret=xxx
+
 # API server url, default value for "--host" parameter
-host=http://frontend.westus.azurecontainer.io/v1
-# Username for HTTP Basic Auth
-user=root
-# Password for the user. You can also provide it in command line via the --password parameter.
-# password=xxxxxx
+# host=https://xxx.azurewebsites.net/v1
+
 # Number of items to show in a "list" subcommand, default value for "--count" parameter
 count=100
+
 # Node pattern to "new" subcommand, default value for "--pattern" parameter
 pattern=*

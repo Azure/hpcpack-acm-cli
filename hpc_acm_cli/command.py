@@ -11,6 +11,7 @@ import hpc_acm
 from hpc_acm.configuration import Configuration
 from hpc_acm.api_client import ApiClient
 from hpc_acm.rest import ApiException
+from aad import get_access_token
 
 # Turn off warning for unverified SSL certificate, but still allow user to turn
 # it on by setting envrionment variable "PYTHONWARNINGS=default".
@@ -48,9 +49,7 @@ class Command:
     def __init__(self, args):
         config = Configuration()
         config.host = args.host
-        config.username = args.user or ''
-        config.password = args.password or ''
-        config.verify_ssl = False
+        config.access_token = get_access_token(args.tenant, args.appid, args.appsecret)
         api_client = ApiClient(config)
         self.api = hpc_acm.DefaultApi(api_client)
         self.args = args
@@ -78,16 +77,20 @@ class Command:
         }
         common_params = [
             {
+                'name': '--tenant',
+                'options': { 'help': 'Tenant of Azure AD', 'default': config.get('DEFAULT', 'tenant', fallback=None) }
+            },
+            {
+                'name': '--appid',
+                'options': { 'help': 'ID of Azure AD App', 'default': config.get('DEFAULT', 'appid', fallback=None) }
+            },
+            {
+                'name': '--appsecret',
+                'options': { 'help': 'Secret of Azure AD App', 'default': config.get('DEFAULT', 'appsecret', fallback=None), 'action': PasswordPrompt }
+            },
+            {
                 'name': '--host', # NOTE: "--base-point" seems a more meaningful name.
                 'options': { 'help': 'the API end point', 'default': config.get('DEFAULT', 'host', fallback=None) }
-            },
-            {
-                'name': '--user',
-                'options': { 'help': 'the authorized user for the API end point', 'default': config.get('DEFAULT', 'user', fallback=None) }
-            },
-            {
-                'name': '--password',
-                'options': { 'help': 'the user password', 'default': config.get('DEFAULT', 'password', fallback=None), 'action': PasswordPrompt }
             },
         ]
         params = cls.params(config)
