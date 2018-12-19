@@ -49,7 +49,7 @@ class Command:
     def __init__(self, args):
         config = Configuration()
         config.host = args.host
-        config.access_token = get_access_token(args.tenant, args.appid, args.appsecret)
+        config.access_token = get_access_token(args.issuer_url, args.client_id, args.client_secret)
         api_client = ApiClient(config)
         self.api = hpc_acm.DefaultApi(api_client)
         self.args = args
@@ -77,16 +77,16 @@ class Command:
         }
         common_params = [
             {
-                'name': '--tenant',
-                'options': { 'help': 'Tenant of Azure AD', 'default': config.get('DEFAULT', 'tenant', fallback=None) }
+                'name': '--issuer-url',
+                'options': { 'help': 'Issuer URL of Azure Active Directory', 'default': config.get('DEFAULT', 'issuer_url', fallback=None) }
             },
             {
-                'name': '--appid',
-                'options': { 'help': 'ID of Azure AD App', 'default': config.get('DEFAULT', 'appid', fallback=None) }
+                'name': '--client-id',
+                'options': { 'help': 'Azure Active Directory App Id', 'default': config.get('DEFAULT', 'client_id', fallback=None) }
             },
             {
-                'name': '--appsecret',
-                'options': { 'help': 'Secret of Azure AD App', 'default': config.get('DEFAULT', 'appsecret', fallback=None), 'action': PasswordPrompt }
+                'name': '--client-secret',
+                'options': { 'help': 'Azure Active Directory App secret', 'default': config.get('DEFAULT', 'client_secret', fallback=None), 'action': PasswordPrompt }
             },
             {
                 'name': '--host', # NOTE: "--base-point" seems a more meaningful name.

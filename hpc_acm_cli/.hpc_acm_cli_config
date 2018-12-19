@@ -1,12 +1,12 @@
 [DEFAULT]
-# Azure Tenant
-# tenant=xxx.onmicrosoft.com
+# Issuer URL of Azure Active Directory
+# issuer_url=https://...
 
-# App id of Azure AD
-# appid=xxx
+# Azure Active Directory App Id
+# client_id=
 
-# App secrect
-# appsecret=xxx
+# Azure Active Directory App secret
+# client_secret=
 
 # API server url, default value for "--host" parameter
 # host=https://xxx.azurewebsites.net/v1
