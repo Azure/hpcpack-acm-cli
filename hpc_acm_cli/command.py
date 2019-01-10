@@ -7,11 +7,11 @@ import argparse
 import getpass
 from hpc_acm_cli.parser_builder import ParserBuilder
 from hpc_acm_cli.easy_config import EasyConfig
+from hpc_acm_cli.aad import get_access_token
 import hpc_acm
 from hpc_acm.configuration import Configuration
 from hpc_acm.api_client import ApiClient
 from hpc_acm.rest import ApiException
-from aad import get_access_token
 
 # Turn off warning for unverified SSL certificate, but still allow user to turn
 # it on by setting envrionment variable "PYTHONWARNINGS=default".
