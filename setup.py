@@ -1,7 +1,7 @@
 import setuptools
 import os.path
 
-requires = ["hpc-acm >= 1.0.0", "terminaltables >= 3.1.0", "tqdm >= 4.24.0", "adal >= 1.2.0"]
+requires = ["hpc-acm >= 1.2.0", "terminaltables >= 3.1.0", "tqdm >= 4.24.0", "adal >= 1.2.0"]
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
