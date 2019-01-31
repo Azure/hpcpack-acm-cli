@@ -49,7 +49,8 @@ class Command:
     def __init__(self, args):
         config = Configuration()
         config.host = args.host
-        config.access_token = get_access_token(args.issuer_url, args.client_id, args.client_secret)
+        if args.issuer_url:
+            config.access_token = get_access_token(args.issuer_url, args.client_id, args.client_secret)
         api_client = ApiClient(config)
         self.api = hpc_acm.DefaultApi(api_client)
         self.args = args
