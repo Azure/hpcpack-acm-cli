@@ -8,7 +8,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="hpc_acm_cli",
-    version="2.8.3",
+    version="2.8.4",
     author="Microsoft HPC Pack",
     author_email="hpccoree@microsoft.com",
     url="https://github.com/Azure/hpcpack-acm-cli",
@@ -36,7 +36,7 @@ setuptools.setup(
     # following link for more info.
     # https://stackoverflow.com/questions/47460804/copy-configuration-file-on-installation
     package_data={
-        'hpc_acm_cli': ['.hpc_acm_cli_config']
+        'hpc_acm_cli': ['.hpc_acm_cli_config', '3rdpartylicenses.txt']
     },
     install_requires=requires
 )
